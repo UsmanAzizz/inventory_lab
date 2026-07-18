@@ -65,8 +65,9 @@ export const FirebaseDBProvider = ({ children }) => {
 
   const saveFaktual = async (rows) => {
     const batch = writeBatch(db);
-    let tempCatalog = [...catalog];
-    let tempStock = [...stock];
+    const latestSnapshot = snapshots.length > 0 ? snapshots[0] : null;
+    let tempCatalog = latestSnapshot ? JSON.parse(JSON.stringify(latestSnapshot.catalog_state)) : JSON.parse(JSON.stringify(catalog));
+    let tempStock = latestSnapshot ? JSON.parse(JSON.stringify(latestSnapshot.stock_state)) : JSON.parse(JSON.stringify(stock));
 
     rows.forEach(row => {
       const id = generateId(row.name, row.brand, row.type);
@@ -117,8 +118,9 @@ export const FirebaseDBProvider = ({ children }) => {
 
   const savePembelian = async (rows) => {
     const batch = writeBatch(db);
-    let tempCatalog = [...catalog];
-    let tempStock = [...stock];
+    const latestSnapshot = snapshots.length > 0 ? snapshots[0] : null;
+    let tempCatalog = latestSnapshot ? JSON.parse(JSON.stringify(latestSnapshot.catalog_state)) : JSON.parse(JSON.stringify(catalog));
+    let tempStock = latestSnapshot ? JSON.parse(JSON.stringify(latestSnapshot.stock_state)) : JSON.parse(JSON.stringify(stock));
 
     rows.forEach(row => {
       const id = generateId(row.name, row.brand, row.type);
@@ -166,8 +168,9 @@ export const FirebaseDBProvider = ({ children }) => {
 
   const saveRusak = async (rows) => {
     const batch = writeBatch(db);
-    let tempCatalog = [...catalog];
-    let tempStock = [...stock];
+    const latestSnapshot = snapshots.length > 0 ? snapshots[0] : null;
+    let tempCatalog = latestSnapshot ? JSON.parse(JSON.stringify(latestSnapshot.catalog_state)) : JSON.parse(JSON.stringify(catalog));
+    let tempStock = latestSnapshot ? JSON.parse(JSON.stringify(latestSnapshot.stock_state)) : JSON.parse(JSON.stringify(stock));
 
     rows.forEach(row => {
       const id = generateId(row.name, row.brand, row.type);
@@ -183,7 +186,6 @@ export const FirebaseDBProvider = ({ children }) => {
       
       if (existingStockIndex >= 0) {
         tempStock[existingStockIndex].qty_good = Math.max(0, tempStock[existingStockIndex].qty_good - outQty);
-        tempStock[existingStockIndex].qty_damaged += outQty; 
         tempStock[existingStockIndex].last_updated = new Date().toISOString();
         
         batch.set(doc(db, 'stock', id), {
@@ -194,7 +196,7 @@ export const FirebaseDBProvider = ({ children }) => {
       } else {
         const stockData = {
           qty_good: 0,
-          qty_damaged: outQty,
+          qty_damaged: 0,
           last_updated: new Date().toISOString()
         };
         batch.set(doc(db, 'stock', id), stockData);
@@ -205,8 +207,8 @@ export const FirebaseDBProvider = ({ children }) => {
       batch.set(logRef, {
         itemId: id,
         action: 'DAMAGE',
-        qty_change: `-${outQty} (Good) -> +${outQty} (Damaged)`,
-        notes: row.notes || 'Pencatatan Barang Rusak/Keluar',
+        qty_change: `-${outQty} (Good)`,
+        notes: row.notes || 'Pencatatan Barang Keluar/Rusak',
         date: row.date || new Date().toISOString()
       });
     });
