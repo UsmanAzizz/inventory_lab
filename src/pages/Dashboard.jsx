@@ -64,7 +64,7 @@ const CustomSelect = ({ value, onChange, options, width }) => {
 };
 
 const Dashboard = () => {
-  const { catalog, stock, snapshots, getDashboardData, getFullInventory, clearData } = useMockDB();
+  const { catalog, stock, snapshots, loading, getDashboardData, getFullInventory, clearData } = useMockDB();
   const [selectedSnapshotId, setSelectedSnapshotId] = React.useState('LATEST');
   const [filterMonth, setFilterMonth] = React.useState('ALL');
 
@@ -78,7 +78,11 @@ const Dashboard = () => {
     }
   }, [filterMonth, filteredSnapshots, selectedSnapshotId]);
 
-  const currentSnapshot = snapshots.find(s => s.id === selectedSnapshotId);
+  // If LATEST is selected, pull data from the most recent snapshot. If none exists, use live stock.
+  const currentSnapshot = selectedSnapshotId === 'LATEST'
+    ? (filteredSnapshots.length > 0 ? filteredSnapshots[0] : null)
+    : snapshots.find(s => s.id === selectedSnapshotId);
+
   const targetStock = currentSnapshot ? currentSnapshot.stock_state : stock;
   const targetCatalog = currentSnapshot ? currentSnapshot.catalog_state : catalog;
 
@@ -105,7 +109,7 @@ const Dashboard = () => {
   ];
 
   const snapshotOptions = [
-    { value: 'LATEST', label: 'Histori Terkini (Saat Ini)' },
+    { value: 'LATEST', label: 'Kondisi Terkini' },
     ...[...filteredSnapshots].reverse().map(snap => ({
       value: snap.id,
       label: `${snap.title} (${formatDate(snap.timestamp)})`
@@ -147,9 +151,11 @@ const Dashboard = () => {
       <div style={{ paddingBottom: '16px' }} />
 
       <h3 style={{ marginBottom: '16px', fontSize: '14px', color: 'var(--text-secondary)' }}>
-        {currentSnapshot 
-          ? <span>Rekap Stok Saat <b>{currentSnapshot.title}</b> ({formatDate(currentSnapshot.timestamp)})</span>
-          : <span>Rekap Stok Aktual Saat Ini</span>
+        {selectedSnapshotId === 'LATEST'
+          ? <span>Rekap Stok Saat Ini</span>
+          : currentSnapshot 
+            ? <span>Rekap Stok Saat <b>{currentSnapshot.title}</b> ({formatDate(currentSnapshot.timestamp)})</span>
+            : <span>Rekap Stok Saat Ini</span>
         }
       </h3>
       
@@ -166,7 +172,13 @@ const Dashboard = () => {
             </tr>
           </thead>
           <tbody>
-            {inventory.length === 0 ? (
+            {loading ? (
+              <tr>
+                <td colSpan="6" className="cell-text" style={{ textAlign: 'center', color: 'var(--primary-blue)', padding: '32px 0' }}>
+                  Sedang memuat data dari pangkalan data...
+                </td>
+              </tr>
+            ) : inventory.length === 0 ? (
               <tr>
                 <td colSpan="6" className="cell-text" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>
                   Belum ada data inventaris. Silakan isi lewat Audit Faktual atau Barang Masuk.

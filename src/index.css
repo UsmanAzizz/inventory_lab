@@ -374,3 +374,67 @@ input[type="number"] {
 .bottom-nav-item.active .icon-wrapper {
   background-color: rgba(59, 130, 246, 0.1);
 }
+
+/* --- PDF Export Table Styles --- */
+.pdf-table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.pdf-table th, .pdf-table td {
+  border: 1px solid #000 !important;
+  padding: 8px !important;
+  background-color: white !important;
+  color: black !important;
+}
+
+.pdf-table th {
+  background-color: #f0f0f0 !important;
+}
+
+/* --- Print Responsiveness --- */
+@media print {
+  /* Hide UI elements that shouldn't be printed */
+  .desktop-only, .mobile-only, .topbar, .bottom-nav, .mobile-header, aside, .no-print {
+    display: none !important;
+  }
+  
+  /* Reset background and text color for paper */
+  body, .main-content-wrapper, .grid-container, .grid-table, .grid-table td, .grid-table th {
+    background-color: white !important;
+    color: black !important;
+    border-color: #000 !important;
+  }
+  
+  /* Remove shadows */
+  * {
+    box-shadow: none !important;
+  }
+
+  /* Expand main content to full width */
+  main, .main-content-wrapper {
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow: visible !important;
+  }
+
+  /* Table borders */
+  .grid-table {
+    border-collapse: collapse !important;
+    width: 100% !important;
+  }
+  
+  .grid-table th, .grid-table td {
+    border: 1px solid #000 !important;
+    padding: 8px !important;
+  }
+
+  /* Hide badges visual styling, just show text */
+  .badge {
+    border: none !important;
+    color: black !important;
+    padding: 0 !important;
+  }
+}

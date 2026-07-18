@@ -4,7 +4,7 @@ import { useMockDB } from '../store/FirebaseDBContext';
 import { toTitleCase } from '../utils';
 
 const KatalogBarang = () => {
-  const { catalog, deleteCatalogItem, addCatalogItem, updateCatalogItem } = useMockDB();
+  const { catalog, deleteCatalogItem, addCatalogItem, updateCatalogItem, loading } = useMockDB();
   
   const [editId, setEditId] = useState(null);
   const [editForm, setEditForm] = useState({ name: '', brand: '', type: '', unit: '' });
@@ -104,7 +104,13 @@ const KatalogBarang = () => {
               </tr>
             )}
             
-            {catalog.length === 0 && !isAdding ? (
+            {loading && !isAdding ? (
+              <tr>
+                <td colSpan="5" className="cell-text" style={{ textAlign: 'center', color: 'var(--primary-blue)', padding: '32px 0' }}>
+                  Sedang memuat data dari pangkalan data...
+                </td>
+              </tr>
+            ) : catalog.length === 0 && !isAdding ? (
               <tr>
                 <td colSpan="5" className="cell-text" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>
                   Belum ada Master Data tercatat di katalog.

@@ -3,7 +3,7 @@ import { Clock } from 'lucide-react';
 import { useMockDB } from '../store/FirebaseDBContext';
 
 const HistoryLog = () => {
-  const { logs, catalog, snapshots } = useMockDB();
+  const { logs, catalog, snapshots, loading } = useMockDB();
 
   const getLogBadge = (type) => {
     if (type === 'PURCHASE') return <span className="badge badge-green">Masuk</span>;
@@ -57,7 +57,13 @@ const HistoryLog = () => {
             </tr>
           </thead>
           <tbody>
-            {logs.length === 0 ? (
+            {loading ? (
+              <tr>
+                <td colSpan="5" className="cell-text" style={{ textAlign: 'center', color: 'var(--primary-blue)', padding: '32px 0' }}>
+                  Sedang memuat data dari pangkalan data...
+                </td>
+              </tr>
+            ) : logs.length === 0 ? (
               <tr>
                 <td colSpan="5" className="cell-text" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>
                   Belum ada riwayat mutasi/transaksi tercatat.

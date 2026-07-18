@@ -1,6 +1,6 @@
 import React from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, CheckSquare, ArrowDownRight, ArrowUpRight, Clock, BookOpen, LogOut } from 'lucide-react';
+import { LayoutDashboard, CheckSquare, ArrowDownRight, ArrowUpRight, Clock, BookOpen, LogOut, Printer } from 'lucide-react';
 
 const Layout = () => {
   const location = useLocation();
@@ -11,6 +11,7 @@ const Layout = () => {
     { path: '/audit', label: 'Audit Faktual', icon: <CheckSquare size={16} /> },
     { path: '/purchase', label: 'Barang Masuk', icon: <ArrowUpRight size={16} /> },
     { path: '/damage', label: 'Barang Rusak/Keluar', icon: <ArrowDownRight size={16} /> },
+    { path: '/laporan', label: 'Cetak Laporan', icon: <Printer size={16} /> },
   ];
 
   const handleLogout = () => {
@@ -89,14 +90,15 @@ const Layout = () => {
                 border: 'none',
                 cursor: 'pointer',
                 fontSize: '13px',
+                fontFamily: 'inherit',
                 fontWeight: '500',
                 textAlign: 'left',
                 transition: 'var(--transition)'
               }}
               onMouseOver={(e) => {
-                e.currentTarget.style.color = '#EF4444';
-                e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
-                e.currentTarget.querySelector('span').style.color = '#EF4444';
+                e.currentTarget.style.color = 'white';
+                e.currentTarget.style.backgroundColor = '#EF4444';
+                e.currentTarget.querySelector('span').style.color = 'white';
               }}
               onMouseOut={(e) => {
                 e.currentTarget.style.color = 'var(--text-secondary)';
@@ -105,7 +107,7 @@ const Layout = () => {
               }}
             >
               <span style={{ color: 'var(--text-muted)', transition: 'var(--transition)' }}><LogOut size={16} /></span>
-              Logout / Kunci Layar
+              Logout
             </button>
           </div>
         </aside>
@@ -135,7 +137,8 @@ const Layout = () => {
                 {item.label === 'Barang Rusak/Keluar' ? 'Keluar' : 
                  item.label === 'Katalog Barang' ? 'Katalog' :
                  item.label === 'Audit Faktual' ? 'Audit' :
-                 item.label === 'Barang Masuk' ? 'Masuk' : 'Overview'}
+                 item.label === 'Barang Masuk' ? 'Masuk' : 
+                 item.label === 'Cetak Laporan' ? 'Cetak' : 'Overview'}
               </span>
             </Link>
           );

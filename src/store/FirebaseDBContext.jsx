@@ -11,24 +11,34 @@ export const FirebaseDBProvider = ({ children }) => {
   const [stock, setStock] = useState([]);
   const [logs, setLogs] = useState([]);
   const [snapshots, setSnapshots] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   // Real-time Listeners
   useEffect(() => {
+    let cLoaded = false, sLoaded = false, lLoaded = false, snLoaded = false;
+    const checkLoading = () => {
+      if (cLoaded && sLoaded && lLoaded && snLoaded) setLoading(false);
+    };
+
     const unsubCatalog = onSnapshot(collection(db, 'catalog'), (snap) => {
       setCatalog(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+      cLoaded = true; checkLoading();
     });
     const unsubStock = onSnapshot(collection(db, 'stock'), (snap) => {
       setStock(snap.docs.map(d => ({ itemId: d.id, ...d.data() })));
+      sLoaded = true; checkLoading();
     });
     const unsubLogs = onSnapshot(collection(db, 'logs'), (snap) => {
       const parsedLogs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
       parsedLogs.sort((a, b) => new Date(b.date) - new Date(a.date));
       setLogs(parsedLogs);
+      lLoaded = true; checkLoading();
     });
     const unsubSnapshots = onSnapshot(collection(db, 'snapshots'), (snap) => {
       const parsedSnaps = snap.docs.map(d => ({ id: d.id, ...d.data() }));
       parsedSnaps.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
       setSnapshots(parsedSnaps);
+      snLoaded = true; checkLoading();
     });
 
     return () => {
@@ -271,7 +281,7 @@ export const FirebaseDBProvider = ({ children }) => {
 
   return (
     <FirebaseDBContext.Provider value={{ 
-      catalog, stock, logs, snapshots,
+      catalog, stock, logs, snapshots, loading,
       saveFaktual, savePembelian, saveRusak, 
       getDashboardData, getFullInventory, clearData, deleteCatalogItem,
       addCatalogItem, updateCatalogItem
