@@ -218,10 +218,6 @@ export const FirebaseDBProvider = ({ children }) => {
     const stockData = { qty_good: 0, qty_damaged: 0, last_updated: new Date().toISOString() };
     batch.set(doc(db, 'stock', id), stockData);
 
-    let tempCatalog = [...catalog, { id, ...newItemData }];
-    let tempStock = [...stock, { itemId: id, ...stockData }];
-
-    createSnapshotBatch(batch, 'Tambah Master Data', tempStock, tempCatalog);
     await batch.commit();
     return true;
   };
@@ -229,9 +225,6 @@ export const FirebaseDBProvider = ({ children }) => {
   const updateCatalogItem = async (id, updatedData) => {
     const batch = writeBatch(db);
     batch.update(doc(db, 'catalog', id), updatedData);
-    
-    let tempCatalog = catalog.map(c => c.id === id ? { ...c, ...updatedData } : c);
-    createSnapshotBatch(batch, 'Edit Master Data', stock, tempCatalog);
     
     await batch.commit();
     return true;
@@ -242,10 +235,6 @@ export const FirebaseDBProvider = ({ children }) => {
       const batch = writeBatch(db);
       batch.delete(doc(db, 'catalog', itemId));
       batch.delete(doc(db, 'stock', itemId));
-
-      let tempCatalog = catalog.filter(c => c.id !== itemId);
-      let tempStock = stock.filter(s => s.itemId !== itemId);
-      createSnapshotBatch(batch, 'Hapus Master Data', tempStock, tempCatalog);
 
       await batch.commit();
     }
