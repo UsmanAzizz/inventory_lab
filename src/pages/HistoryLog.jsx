@@ -3,7 +3,7 @@ import { Clock } from 'lucide-react';
 import { useMockDB } from '../store/FirebaseDBContext';
 
 const HistoryLog = () => {
-  const { logs, catalog } = useMockDB();
+  const { logs, catalog, snapshots } = useMockDB();
 
   const getLogBadge = (type) => {
     if (type === 'PURCHASE') return <span className="badge badge-green">Masuk</span>;
@@ -12,7 +12,20 @@ const HistoryLog = () => {
   };
 
   const getItemName = (itemId) => {
-    const item = catalog.find(i => i.id === itemId);
+    // 1. Coba cari di katalog aktual saat ini
+    let item = catalog.find(i => i.id === itemId);
+    
+    // 2. Jika barang sudah dihapus dari katalog, cari jejaknya di histori snapshot masa lalu
+    if (!item && snapshots) {
+      for (const snap of snapshots) {
+        const found = snap.catalog_state?.find(i => i.id === itemId);
+        if (found) {
+          item = found;
+          break;
+        }
+      }
+    }
+
     return item ? `${item.name} (${item.brand} ${item.type})` : 'Barang Tidak Dikenal';
   };
 
