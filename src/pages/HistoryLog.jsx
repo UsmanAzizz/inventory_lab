@@ -7,7 +7,8 @@ const HistoryLog = () => {
 
   const getLogBadge = (type) => {
     if (type === 'PURCHASE') return <span className="badge badge-green">Masuk</span>;
-    if (type === 'DAMAGE') return <span className="badge badge-red">Keluar</span>;
+    if (type === 'DAMAGE') return <span className="badge badge-red">Rusak</span>;
+    if (type === 'OUTBOUND') return <span className="badge" style={{ backgroundColor: 'rgba(245, 158, 11, 0.1)', color: '#F59E0B' }}>Keluar</span>;
     return <span className="badge badge-yellow">Opname</span>;
   };
 

@@ -6,6 +6,7 @@ import KatalogBarang from './pages/KatalogBarang';
 import InputFaktual from './pages/InputFaktual';
 import InputPembelian from './pages/InputPembelian';
 import InputRusak from './pages/InputRusak';
+import InputKeluar from './pages/InputKeluar';
 import Laporan from './pages/Laporan';
 import Login from './pages/Login';
 import { FirebaseDBProvider } from './store/FirebaseDBContext';
@@ -34,6 +35,7 @@ function App() {
             <Route path="audit" element={<InputFaktual />} />
             <Route path="purchase" element={<InputPembelian />} />
             <Route path="damage" element={<InputRusak />} />
+            <Route path="outbound" element={<InputKeluar />} />
             <Route path="laporan" element={<Laporan />} />
           </Route>
         </Routes>

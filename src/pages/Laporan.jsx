@@ -99,7 +99,8 @@ const Laporan = () => {
               <option value="ALL">Semua Mutasi</option>
               <option value="Audit Faktual">Inventaris (Audit)</option>
               <option value="Barang Masuk">Pengadaan (Masuk)</option>
-              <option value="Barang Rusak/Keluar">Pengeluaran (Keluar)</option>
+              <option value="Barang Rusak">Barang Rusak</option>
+              <option value="Barang Keluar">Pengeluaran (Keluar)</option>
             </select>
           </div>
         </div>

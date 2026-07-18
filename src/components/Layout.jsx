@@ -1,6 +1,6 @@
 import React from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, CheckSquare, ArrowDownRight, ArrowUpRight, Clock, BookOpen, LogOut, Printer } from 'lucide-react';
+import { LayoutDashboard, CheckSquare, ArrowDownRight, ArrowUpRight, ArrowRightFromLine, Clock, BookOpen, LogOut, Printer } from 'lucide-react';
 
 const Layout = () => {
   const location = useLocation();
@@ -10,7 +10,8 @@ const Layout = () => {
     { path: '/katalog', label: 'Katalog Barang', icon: <BookOpen size={16} /> },
     { path: '/audit', label: 'Audit Faktual', icon: <CheckSquare size={16} /> },
     { path: '/purchase', label: 'Barang Masuk', icon: <ArrowUpRight size={16} /> },
-    { path: '/damage', label: 'Barang Rusak/Keluar', icon: <ArrowDownRight size={16} /> },
+    { path: '/damage', label: 'Barang Rusak', icon: <ArrowDownRight size={16} /> },
+    { path: '/outbound', label: 'Barang Keluar', icon: <ArrowRightFromLine size={16} /> },
     { path: '/laporan', label: 'Cetak Laporan', icon: <Printer size={16} /> },
   ];
 

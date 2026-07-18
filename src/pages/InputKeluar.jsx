@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { ArrowUpRight, Plus, Trash2 } from 'lucide-react';
+import { ArrowRightFromLine, Plus, Trash2 } from 'lucide-react';
 
 import { useMockDB } from '../store/FirebaseDBContext';
 import { toTitleCase } from '../utils';
 
-const InputPembelian = () => {
-  const { catalog, savePembelian } = useMockDB();
+const InputKeluar = () => {
+  const { catalog, saveKeluar } = useMockDB();
   const [rows, setRows] = useState([]);
 
   // Datalist options
@@ -21,7 +21,8 @@ const InputPembelian = () => {
       brand: '', 
       type: '', 
       unit: 'Unit', 
-      qty_in: '', 
+      qty_out: '', 
+      source: 'good',
       notes: '',
       isMatched: false
     }, ...rows]);
@@ -60,10 +61,10 @@ const InputPembelian = () => {
   };
 
   const handleSave = () => {
-    const validRows = rows.filter(r => r.name !== '' && r.qty_in !== '');
-    if (validRows.length === 0) return alert('Belum ada data valid yang siap disimpan.');
+    const validRows = rows.filter(r => r.name !== '' && r.qty_out !== '' && r.notes !== '');
+    if (validRows.length === 0) return alert('Belum ada data valid yang siap disimpan. Pastikan Keterangan terisi.');
     
-    savePembelian(validRows);
+    saveKeluar(validRows);
     
     alert('Disimpan: ' + validRows.length + ' baris transaksi');
     setRows([]);
@@ -74,12 +75,12 @@ const InputPembelian = () => {
       <div className="topbar" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '16px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
           <h2 className="page-title">
-            <ArrowUpRight size={20} color="#10B981" /> Catat Barang Masuk (Pembelian)
+            <ArrowRightFromLine size={20} color="#F59E0B" /> Catat Barang Keluar
           </h2>
           <button className="btn btn-success" onClick={handleSave}>Simpan</button>
         </div>
         <button className="btn btn-outline" onClick={addRow}>
-          <Plus size={16} /> Tambah Baris Transaksi
+          <Plus size={16} /> Tambah Baris Barang
         </button>
       </div>
 
@@ -95,7 +96,7 @@ const InputPembelian = () => {
 
       {rows.length === 0 ? (
         <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-secondary)', border: '1px dashed var(--border-color)', borderRadius: 'var(--radius-sm)' }}>
-          Belum ada data barang masuk. Tekan <b>+ Tambah Baris Transaksi</b> untuk memulai.
+          Belum ada data barang keluar. Tekan <b>+ Tambah Baris Barang</b> untuk memulai.
         </div>
       ) : (
         <div className="grid-container" style={{ overflowX: 'auto' }}>
@@ -104,10 +105,11 @@ const InputPembelian = () => {
               <tr>
                 <th style={{ width: '20%' }}>Nama Barang</th>
                 <th style={{ width: '15%' }}>Merek</th>
-                <th style={{ width: '15%' }}>Tipe/Model</th>
-                <th style={{ width: '10%' }}>Satuan</th>
-                <th style={{ width: '15%', color: '#10B981' }}>+ Jumlah Masuk</th>
-                <th style={{ width: '25%' }}>Keterangan / Kuitansi</th>
+                <th style={{ width: '10%' }}>Tipe/Model</th>
+                <th style={{ width: '8%' }}>Satuan</th>
+                <th style={{ width: '12%', color: '#F59E0B' }}>Jumlah Keluar</th>
+                <th style={{ width: '15%' }}>Sumber Stok</th>
+                <th style={{ width: '20%' }}>Keterangan</th>
                 <th style={{ width: '5%', textAlign: 'center' }}>Aksi</th>
               </tr>
             </thead>
@@ -156,14 +158,26 @@ const InputPembelian = () => {
                       type="number" 
                       min="0"
                       className="cell-input" 
-                      value={row.qty_in}
-                      onChange={(e) => handleChange(row.rowId, 'qty_in', e.target.value)}
+                      value={row.qty_out}
+                      onChange={(e) => handleChange(row.rowId, 'qty_out', e.target.value)}
                     />
+                  </td>
+                  <td>
+                    <select
+                      className="cell-input"
+                      value={row.source}
+                      onChange={(e) => handleChange(row.rowId, 'source', e.target.value)}
+                      style={{ padding: '8px' }}
+                    >
+                      <option value="good">Stok Baik</option>
+                      <option value="damaged">Stok Rusak</option>
+                    </select>
                   </td>
                   <td>
                     <input 
                       type="text" 
                       className="cell-input" 
+                      placeholder="Wajib (misal: Dijual)"
                       value={row.notes}
                       onChange={(e) => handleChange(row.rowId, 'notes', e.target.value)}
                     />
@@ -186,4 +200,4 @@ const InputPembelian = () => {
   );
 };
 
-export default InputPembelian;
+export default InputKeluar;

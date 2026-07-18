@@ -73,12 +73,12 @@ const InputRusak = () => {
       <div className="topbar" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '16px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
           <h2 className="page-title">
-            <ArrowDownRight size={20} color="#EF4444" /> Catat Barang Rusak / Keluar
+            <ArrowDownRight size={20} color="#EF4444" /> Catat Barang Rusak
           </h2>
           <button className="btn btn-success" onClick={handleSave}>Simpan</button>
         </div>
         <button className="btn btn-outline" onClick={addRow}>
-          <Plus size={16} /> Tambah Baris Transaksi
+          <Plus size={16} /> Tambah Baris Barang
         </button>
       </div>
 
@@ -94,19 +94,18 @@ const InputRusak = () => {
 
       {rows.length === 0 ? (
         <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-secondary)', border: '1px dashed var(--border-color)', borderRadius: 'var(--radius-sm)' }}>
-          Belum ada data barang rusak/keluar. Tekan <b>+ Tambah Baris Transaksi</b> untuk memulai.
+          Belum ada data barang rusak. Tekan <b>+ Tambah Baris Barang</b> untuk memulai.
         </div>
       ) : (
         <div className="grid-container" style={{ overflowX: 'auto' }}>
           <table className="grid-table" style={{ minWidth: '900px' }}>
             <thead>
               <tr>
-                <th style={{ width: '15%' }}>Waktu Transaksi</th>
-                <th style={{ width: '15%' }}>Nama Barang</th>
-                <th style={{ width: '10%' }}>Merek</th>
+                <th style={{ width: '20%' }}>Nama Barang</th>
+                <th style={{ width: '15%' }}>Merek</th>
                 <th style={{ width: '15%' }}>Tipe/Model</th>
                 <th style={{ width: '10%' }}>Satuan</th>
-                <th style={{ width: '15%', color: '#EF4444' }}>Jumlah Rusak/Keluar</th>
+                <th style={{ width: '15%', color: '#EF4444' }}>Jumlah Rusak</th>
                 <th style={{ width: '25%' }}>Keterangan</th>
                 <th style={{ width: '5%', textAlign: 'center' }}>Aksi</th>
               </tr>
@@ -114,14 +113,6 @@ const InputRusak = () => {
             <tbody>
               {rows.map((row) => (
                 <tr key={row.rowId}>
-                  <td>
-                    <input 
-                      type="datetime-local" 
-                      className="cell-input" 
-                      value={row.date}
-                      onChange={(e) => handleChange(row.rowId, 'date', e.target.value)}
-                    />
-                  </td>
                   <td>
                     <input 
                       type="text" 

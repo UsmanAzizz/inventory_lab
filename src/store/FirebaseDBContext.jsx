@@ -186,6 +186,63 @@ export const FirebaseDBProvider = ({ children }) => {
       
       if (existingStockIndex >= 0) {
         tempStock[existingStockIndex].qty_good = Math.max(0, tempStock[existingStockIndex].qty_good - outQty);
+        tempStock[existingStockIndex].qty_damaged += outQty; 
+        tempStock[existingStockIndex].last_updated = new Date().toISOString();
+        
+        batch.set(doc(db, 'stock', id), {
+          qty_good: tempStock[existingStockIndex].qty_good,
+          qty_damaged: tempStock[existingStockIndex].qty_damaged,
+          last_updated: tempStock[existingStockIndex].last_updated
+        }, { merge: true });
+      } else {
+        const stockData = {
+          qty_good: 0,
+          qty_damaged: outQty,
+          last_updated: new Date().toISOString()
+        };
+        batch.set(doc(db, 'stock', id), stockData);
+        tempStock.push({ itemId: id, ...stockData });
+      }
+
+      const logRef = doc(collection(db, 'logs'));
+      batch.set(logRef, {
+        itemId: id,
+        action: 'DAMAGE',
+        qty_change: `-${outQty} (Good) -> +${outQty} (Damaged)`,
+        notes: row.notes || 'Pencatatan Barang Keluar/Rusak',
+        date: row.date || new Date().toISOString()
+      });
+    });
+
+    createSnapshotBatch(batch, 'Barang Rusak', tempStock, tempCatalog);
+    await batch.commit();
+  };
+
+  const saveKeluar = async (rows) => {
+    const batch = writeBatch(db);
+    const latestSnapshot = snapshots.length > 0 ? snapshots[0] : null;
+    let tempCatalog = latestSnapshot ? JSON.parse(JSON.stringify(latestSnapshot.catalog_state)) : JSON.parse(JSON.stringify(catalog));
+    let tempStock = latestSnapshot ? JSON.parse(JSON.stringify(latestSnapshot.stock_state)) : JSON.parse(JSON.stringify(stock));
+
+    rows.forEach(row => {
+      const id = generateId(row.name, row.brand, row.type);
+      const outQty = parseInt(row.qty_out) || 0;
+      const source = row.source || 'good';
+
+      if (!tempCatalog.find(c => c.id === id)) {
+        const item = { name: row.name, brand: row.brand, type: row.type, unit: row.unit };
+        batch.set(doc(db, 'catalog', id), item);
+        tempCatalog.push({ id, ...item });
+      }
+
+      const existingStockIndex = tempStock.findIndex(s => s.itemId === id);
+      
+      if (existingStockIndex >= 0) {
+        if (source === 'good') {
+          tempStock[existingStockIndex].qty_good = Math.max(0, tempStock[existingStockIndex].qty_good - outQty);
+        } else {
+          tempStock[existingStockIndex].qty_damaged = Math.max(0, tempStock[existingStockIndex].qty_damaged - outQty);
+        }
         tempStock[existingStockIndex].last_updated = new Date().toISOString();
         
         batch.set(doc(db, 'stock', id), {
@@ -204,16 +261,17 @@ export const FirebaseDBProvider = ({ children }) => {
       }
 
       const logRef = doc(collection(db, 'logs'));
+      const sourceText = source === 'good' ? 'Baik' : 'Rusak';
       batch.set(logRef, {
         itemId: id,
-        action: 'DAMAGE',
-        qty_change: `-${outQty} (Good)`,
-        notes: row.notes || 'Pencatatan Barang Keluar/Rusak',
+        action: 'OUTBOUND',
+        qty_change: `-${outQty} (Stok ${sourceText})`,
+        notes: row.notes,
         date: row.date || new Date().toISOString()
       });
     });
 
-    createSnapshotBatch(batch, 'Barang Rusak/Keluar', tempStock, tempCatalog);
+    createSnapshotBatch(batch, 'Barang Keluar', tempStock, tempCatalog);
     await batch.commit();
   };
 
@@ -284,7 +342,7 @@ export const FirebaseDBProvider = ({ children }) => {
   return (
     <FirebaseDBContext.Provider value={{ 
       catalog, stock, logs, snapshots, loading,
-      saveFaktual, savePembelian, saveRusak, 
+      saveFaktual, savePembelian, saveRusak, saveKeluar,
       getDashboardData, getFullInventory, clearData, deleteCatalogItem,
       addCatalogItem, updateCatalogItem
     }}>
