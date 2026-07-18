@@ -1,19 +1,50 @@
 import React, { useState } from 'react';
 import { CheckSquare, Plus, Trash2 } from 'lucide-react';
 
+import { useMockDB } from '../store/MockDBContext';
+
 const InputFaktual = () => {
+  const { catalog, saveFaktual, getFullInventory } = useMockDB();
   const [rows, setRows] = useState([]); // Mulai dengan kosong sesuai instruksi
 
+  // Datalist options
+  const uniqueNames = [...new Set(catalog.map(c => c.name))].filter(Boolean);
+  const uniqueBrands = [...new Set(catalog.map(c => c.brand))].filter(Boolean);
+  const uniqueTypes = [...new Set(catalog.map(c => c.type))].filter(Boolean);
+
   const addRow = () => {
-    setRows([...rows, { 
+    setRows([{ 
       rowId: Date.now(), 
       name: '', 
       brand: '', 
       type: '', 
       unit: 'Unit', 
       qty_good: '', 
-      qty_damaged: '' 
-    }]);
+      qty_damaged: '',
+      isMatched: false
+    }, ...rows]);
+  };
+
+  const loadLatestData = () => {
+    const inventory = getFullInventory();
+    if (inventory.length === 0) {
+      alert('Belum ada data stok/katalog sebelumnya.');
+      return;
+    }
+    
+    const newRows = inventory.map(item => ({
+      rowId: Date.now() + Math.random(),
+      name: item.name,
+      brand: item.brand,
+      type: item.type,
+      type: item.type,
+      unit: item.unit,
+      qty_good: item.qty_good,
+      qty_damaged: item.qty_damaged,
+      isMatched: true // Coming from inventory, so it's matched
+    }));
+    
+    setRows(newRows);
   };
 
   const removeRow = (rowId) => {
@@ -23,7 +54,24 @@ const InputFaktual = () => {
   const handleChange = (rowId, field, value) => {
     setRows(rows.map(row => {
       if (row.rowId === rowId) {
-        return { ...row, [field]: value };
+        const updatedRow = { ...row, [field]: value };
+        
+        // Autocomplete check
+        if (field === 'name' || field === 'brand' || field === 'type') {
+          const match = catalog.find(c => 
+            c.name.toLowerCase() === updatedRow.name.toLowerCase() &&
+            c.brand.toLowerCase() === updatedRow.brand.toLowerCase() &&
+            c.type.toLowerCase() === updatedRow.type.toLowerCase()
+          );
+          
+          if (match) {
+            updatedRow.unit = match.unit;
+            updatedRow.isMatched = true;
+          } else {
+            updatedRow.isMatched = false;
+          }
+        }
+        return updatedRow;
       }
       return row;
     }));
@@ -32,8 +80,10 @@ const InputFaktual = () => {
   const handleSave = () => {
     const validRows = rows.filter(r => r.name !== '' && (r.qty_good !== '' || r.qty_damaged !== ''));
     if (validRows.length === 0) return alert('Belum ada data valid yang diisi.');
-    console.log('Simpan Audit Faktual:', validRows);
-    alert('Disimpan: ' + validRows.length + ' baris barang');
+    
+    saveFaktual(validRows);
+    
+    alert('Disimpan: ' + validRows.length + ' baris barang ke Master Data');
     setRows([]); // Kosongkan lagi
   };
 
@@ -44,13 +94,28 @@ const InputFaktual = () => {
           <h2 className="page-title">
             <CheckSquare size={20} color="var(--primary-blue)" /> Audit Faktual (Master Data)
           </h2>
-          <button className="btn btn-accent" onClick={handleSave}>Simpan Semua</button>
+          <button className="btn btn-success" onClick={handleSave}>Simpan</button>
         </div>
         
-        <button className="btn btn-outline" onClick={addRow}>
-          <Plus size={16} /> Tambah Baris Barang
-        </button>
+        <div style={{ display: 'flex', gap: '12px' }}>
+          <button className="btn btn-outline" onClick={loadLatestData}>
+            Muat Data Terakhir
+          </button>
+          <button className="btn btn-outline" onClick={addRow}>
+            <Plus size={16} /> Tambah Baris Barang
+          </button>
+        </div>
       </div>
+
+      <datalist id="catalog-names">
+        {uniqueNames.map((n, i) => <option key={i} value={n} />)}
+      </datalist>
+      <datalist id="catalog-brands">
+        {uniqueBrands.map((b, i) => <option key={i} value={b} />)}
+      </datalist>
+      <datalist id="catalog-types">
+        {uniqueTypes.map((t, i) => <option key={i} value={t} />)}
+      </datalist>
 
       {rows.length === 0 ? (
         <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-secondary)', border: '1px dashed var(--border-color)', borderRadius: 'var(--radius-sm)' }}>
@@ -67,7 +132,7 @@ const InputFaktual = () => {
                 <th style={{ width: '10%' }}>Satuan</th>
                 <th style={{ width: '12%', color: '#10B981' }}>Jml. Baik</th>
                 <th style={{ width: '12%', color: '#EF4444' }}>Jml. Rusak</th>
-                <th style={{ width: '15%' }}>Total</th>
+                <th style={{ width: '15%', textAlign: 'center' }}>Total</th>
                 <th style={{ width: '6%', textAlign: 'center' }}>Aksi</th>
               </tr>
             </thead>
@@ -83,7 +148,7 @@ const InputFaktual = () => {
                       <input 
                         type="text" 
                         className="cell-input" 
-                        placeholder="Contoh: Monitor"
+                        list="catalog-names"
                         value={row.name}
                         onChange={(e) => handleChange(row.rowId, 'name', e.target.value)}
                       />
@@ -92,7 +157,7 @@ const InputFaktual = () => {
                       <input 
                         type="text" 
                         className="cell-input" 
-                        placeholder="Samsung"
+                        list="catalog-brands"
                         value={row.brand}
                         onChange={(e) => handleChange(row.rowId, 'brand', e.target.value)}
                       />
@@ -101,7 +166,7 @@ const InputFaktual = () => {
                       <input 
                         type="text" 
                         className="cell-input" 
-                        placeholder="24 Inch"
+                        list="catalog-types"
                         value={row.type}
                         onChange={(e) => handleChange(row.rowId, 'type', e.target.value)}
                       />
@@ -110,16 +175,17 @@ const InputFaktual = () => {
                       <input 
                         type="text" 
                         className="cell-input" 
-                        placeholder="Unit, Pcs..."
                         value={row.unit}
+                        disabled={row.isMatched}
                         onChange={(e) => handleChange(row.rowId, 'unit', e.target.value)}
+                        style={{ color: row.isMatched ? 'var(--text-muted)' : 'var(--text-primary)' }}
                       />
                     </td>
                     <td>
                       <input 
                         type="number" 
+                        min="0"
                         className="cell-input" 
-                        placeholder="0"
                         value={row.qty_good}
                         onChange={(e) => handleChange(row.rowId, 'qty_good', e.target.value)}
                       />
@@ -127,13 +193,13 @@ const InputFaktual = () => {
                     <td>
                       <input 
                         type="number" 
+                        min="0"
                         className="cell-input" 
-                        placeholder="0"
                         value={row.qty_damaged}
                         onChange={(e) => handleChange(row.rowId, 'qty_damaged', e.target.value)}
                       />
                     </td>
-                    <td className="cell-text" style={{ fontWeight: '600', color: 'var(--text-primary)' }}>
+                    <td className="cell-text" style={{ fontWeight: '600', color: 'var(--text-primary)', textAlign: 'center' }}>
                       {total} {row.unit}
                     </td>
                     <td style={{ textAlign: 'center', verticalAlign: 'middle' }}>

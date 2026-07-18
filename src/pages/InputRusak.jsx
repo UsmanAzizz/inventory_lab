@@ -1,21 +1,28 @@
 import React, { useState } from 'react';
 import { ArrowDownRight, Plus, Trash2 } from 'lucide-react';
 
-const InputRusak = () => {
-  // Master data barang
-  const masterItems = [
-    { id: '1', name: 'Monitor Samsung 24"', current_stock: 45 },
-    { id: '2', name: 'Mouse Logitech B100', current_stock: 120 },
-    { id: '3', name: 'Keyboard Fantech', current_stock: 80 },
-  ];
+import { useMockDB } from '../store/MockDBContext';
 
-  // Baris dinamis yang diinput user
-  const [rows, setRows] = useState([
-    { rowId: Date.now(), itemId: '', current_stock: 0, subtract_qty: '', notes: '' }
-  ]);
+const InputRusak = () => {
+  const { catalog, saveRusak } = useMockDB();
+  const [rows, setRows] = useState([]);
+
+  // Datalist options
+  const uniqueNames = [...new Set(catalog.map(c => c.name))].filter(Boolean);
+  const uniqueBrands = [...new Set(catalog.map(c => c.brand))].filter(Boolean);
+  const uniqueTypes = [...new Set(catalog.map(c => c.type))].filter(Boolean);
 
   const addRow = () => {
-    setRows([...rows, { rowId: Date.now(), itemId: '', current_stock: 0, subtract_qty: '', notes: '' }]);
+    setRows([{ 
+      rowId: Date.now(), 
+      name: '', 
+      brand: '', 
+      type: '', 
+      unit: 'Unit', 
+      qty_out: '', 
+      notes: '',
+      isMatched: false
+    }, ...rows]);
   };
 
   const removeRow = (rowId) => {
@@ -26,9 +33,21 @@ const InputRusak = () => {
     setRows(rows.map(row => {
       if (row.rowId === rowId) {
         const updatedRow = { ...row, [field]: value };
-        if (field === 'itemId') {
-          const selectedItem = masterItems.find(i => i.id === value);
-          updatedRow.current_stock = selectedItem ? selectedItem.current_stock : 0;
+        
+        // Autocomplete check
+        if (field === 'name' || field === 'brand' || field === 'type') {
+          const match = catalog.find(c => 
+            c.name.toLowerCase() === updatedRow.name.toLowerCase() &&
+            c.brand.toLowerCase() === updatedRow.brand.toLowerCase() &&
+            c.type.toLowerCase() === updatedRow.type.toLowerCase()
+          );
+          
+          if (match) {
+            updatedRow.unit = match.unit;
+            updatedRow.isMatched = true;
+          } else {
+            updatedRow.isMatched = false;
+          }
         }
         return updatedRow;
       }
@@ -37,92 +56,128 @@ const InputRusak = () => {
   };
 
   const handleSave = () => {
-    const validRows = rows.filter(r => r.itemId !== '' && r.subtract_qty !== '' && parseInt(r.subtract_qty) > 0);
-    if (validRows.length === 0) return alert('Tidak ada data kerusakan/pengurangan yang valid.');
+    const validRows = rows.filter(r => r.name !== '' && r.qty_out !== '');
+    if (validRows.length === 0) return alert('Belum ada data kerusakan/keluar yang valid.');
     
-    console.log('Simpan Barang Rusak:', validRows);
+    saveRusak(validRows);
+    
     alert('Disimpan: ' + validRows.length + ' baris transaksi');
-    setRows([{ rowId: Date.now(), itemId: '', current_stock: 0, subtract_qty: '', notes: '' }]);
+    setRows([]);
   };
 
   return (
     <div>
-      <div className="topbar">
-        <h2 className="page-title">
-          <ArrowDownRight size={20} color="#EF4444" /> Catat Barang Rusak / Keluar
-        </h2>
-        <div style={{ display: 'flex', gap: '12px' }}>
-          <button className="btn btn-outline" onClick={addRow}>
-            <Plus size={16} /> Tambah Baris
-          </button>
-          <button className="btn btn-accent" onClick={handleSave}>Simpan Perubahan</button>
+      <div className="topbar" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '16px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
+          <h2 className="page-title">
+            <ArrowDownRight size={20} color="#EF4444" /> Catat Barang Rusak / Keluar
+          </h2>
+          <button className="btn btn-success" onClick={handleSave}>Simpan</button>
         </div>
+        <button className="btn btn-outline" onClick={addRow}>
+          <Plus size={16} /> Tambah Baris Transaksi
+        </button>
       </div>
 
-      <div className="grid-container">
-        <table className="grid-table">
-          <thead>
-            <tr>
-              <th style={{ width: '25%' }}>Nama Barang</th>
-              <th style={{ width: '15%' }}>Stok Sistem</th>
-              <th style={{ width: '20%' }}>Jumlah Keluar (-Unit)</th>
-              <th style={{ width: '35%' }}>Keterangan</th>
-              <th style={{ width: '5%', textAlign: 'center' }}>Aksi</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((row) => (
-              <tr key={row.rowId}>
-                <td>
-                  <select 
-                    className="cell-input" 
-                    value={row.itemId}
-                    onChange={(e) => handleChange(row.rowId, 'itemId', e.target.value)}
-                  >
-                    <option value="" disabled>Pilih Barang...</option>
-                    {masterItems.map(item => (
-                      <option key={item.id} value={item.id}>{item.name}</option>
-                    ))}
-                  </select>
-                </td>
-                <td className="cell-text" style={{ color: 'var(--text-secondary)' }}>
-                  {row.itemId ? `${row.current_stock} Unit` : '-'}
-                </td>
-                <td>
-                  <input 
-                    type="number" 
-                    className="cell-input" 
-                    placeholder="Contoh: 2"
-                    value={row.subtract_qty}
-                    onChange={(e) => handleChange(row.rowId, 'subtract_qty', e.target.value)}
-                  />
-                </td>
-                <td>
-                  <input 
-                    type="text" 
-                    className="cell-input" 
-                    placeholder="Keterangan..."
-                    value={row.notes}
-                    onChange={(e) => handleChange(row.rowId, 'notes', e.target.value)}
-                  />
-                </td>
-                <td style={{ textAlign: 'center', verticalAlign: 'middle' }}>
-                  <button 
-                    onClick={() => removeRow(row.rowId)}
-                    style={{ 
-                      background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer',
-                      opacity: rows.length === 1 ? 0.3 : 1
-                    }}
-                    disabled={rows.length === 1}
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                </td>
+      <datalist id="catalog-names">
+        {uniqueNames.map((n, i) => <option key={i} value={n} />)}
+      </datalist>
+      <datalist id="catalog-brands">
+        {uniqueBrands.map((b, i) => <option key={i} value={b} />)}
+      </datalist>
+      <datalist id="catalog-types">
+        {uniqueTypes.map((t, i) => <option key={i} value={t} />)}
+      </datalist>
+
+      {rows.length === 0 ? (
+        <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-secondary)', border: '1px dashed var(--border-color)', borderRadius: 'var(--radius-sm)' }}>
+          Belum ada data barang rusak/keluar. Tekan <b>+ Tambah Baris Transaksi</b> untuk memulai.
+        </div>
+      ) : (
+        <div className="grid-container" style={{ overflowX: 'auto' }}>
+          <table className="grid-table" style={{ minWidth: '900px' }}>
+            <thead>
+              <tr>
+                <th style={{ width: '15%' }}>Nama Barang</th>
+                <th style={{ width: '15%' }}>Merek</th>
+                <th style={{ width: '15%' }}>Tipe/Model</th>
+                <th style={{ width: '10%' }}>Satuan</th>
+                <th style={{ width: '15%', color: '#EF4444' }}>Jumlah Rusak/Keluar</th>
+                <th style={{ width: '25%' }}>Keterangan</th>
+                <th style={{ width: '5%', textAlign: 'center' }}>Aksi</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {rows.map((row) => (
+                <tr key={row.rowId}>
+                  <td>
+                    <input 
+                      type="text" 
+                      className="cell-input" 
+                      list="catalog-names"
+                      value={row.name}
+                      onChange={(e) => handleChange(row.rowId, 'name', e.target.value)}
+                    />
+                  </td>
+                  <td>
+                    <input 
+                      type="text" 
+                      className="cell-input" 
+                      list="catalog-brands"
+                      value={row.brand}
+                      onChange={(e) => handleChange(row.rowId, 'brand', e.target.value)}
+                    />
+                  </td>
+                  <td>
+                    <input 
+                      type="text" 
+                      className="cell-input" 
+                      list="catalog-types"
+                      value={row.type}
+                      onChange={(e) => handleChange(row.rowId, 'type', e.target.value)}
+                    />
+                  </td>
+                  <td>
+                    <input 
+                      type="text" 
+                      className="cell-input" 
+                      value={row.unit}
+                      disabled={row.isMatched}
+                      onChange={(e) => handleChange(row.rowId, 'unit', e.target.value)}
+                      style={{ color: row.isMatched ? 'var(--text-muted)' : 'var(--text-primary)' }}
+                    />
+                  </td>
+                  <td>
+                    <input 
+                      type="number" 
+                      min="0"
+                      className="cell-input" 
+                      value={row.qty_out}
+                      onChange={(e) => handleChange(row.rowId, 'qty_out', e.target.value)}
+                    />
+                  </td>
+                  <td>
+                    <input 
+                      type="text" 
+                      className="cell-input" 
+                      value={row.notes}
+                      onChange={(e) => handleChange(row.rowId, 'notes', e.target.value)}
+                    />
+                  </td>
+                  <td style={{ textAlign: 'center', verticalAlign: 'middle' }}>
+                    <button 
+                      onClick={() => removeRow(row.rowId)}
+                      style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 };

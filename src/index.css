@@ -1,25 +1,28 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 :root {
-  --bg-void: #000000;
-  --bg-surface: #0A0A0A;
-  --bg-hover: #111111;
+  --bg-void: #09090b;
+  --bg-surface: #18181b;
+  --bg-hover: #27272a;
   
-  --primary-blue: #007BFF;
-  --accent-yellow: #FADB14;
+  --primary-blue: #3b82f6;
+  --accent-yellow: #fbbf24;
   
-  --text-primary: #FFFFFF;
-  --text-secondary: #888888;
-  --text-muted: #444444;
-  --text-dark: #000000;
+  --text-primary: #fafafa;
+  --text-secondary: #a1a1aa;
+  --text-muted: #52525b;
+  --text-dark: #09090b;
   
-  --border-color: #222222;
-  --border-focus: #444444;
+  --border-color: #27272a;
+  --border-focus: #3f3f46;
   
   --radius-none: 0px;
-  --radius-sm: 2px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
   
-  --transition: all 0.15s ease;
+  --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
 }
 
 * {
@@ -64,37 +67,55 @@ h1, h2, h3, h4, h5, h6 {
 .btn-primary {
   background-color: var(--text-primary);
   color: var(--text-dark);
+  box-shadow: var(--shadow-sm);
 }
 
 .btn-primary:hover {
-  background-color: #DDDDDD;
+  background-color: #e4e4e7;
+  transform: translateY(-1px);
 }
 
 .btn-accent {
   background-color: var(--accent-yellow);
   color: var(--text-dark);
+  box-shadow: var(--shadow-sm);
 }
 
 .btn-accent:hover {
-  background-color: #E5C800;
+  background-color: #f59e0b;
+  transform: translateY(-1px);
+}
+
+.btn-success {
+  background-color: #10B981;
+  color: #ffffff;
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-success:hover {
+  background-color: #059669;
+  transform: translateY(-1px);
 }
 
 .btn-outline {
   border-color: var(--border-color);
   color: var(--text-secondary);
+  background-color: var(--bg-surface);
 }
 
 .btn-outline:hover {
   border-color: var(--text-secondary);
   color: var(--text-primary);
+  background-color: var(--bg-hover);
 }
 
 /* Excel-like Grid / Table */
 .grid-container {
   width: 100%;
   border: 1px solid var(--border-color);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
   overflow: hidden;
+  box-shadow: var(--shadow-md);
 }
 
 .grid-table {
@@ -105,7 +126,7 @@ h1, h2, h3, h4, h5, h6 {
 
 .grid-table th {
   text-align: left;
-  padding: 12px 16px;
+  padding: 14px 16px;
   color: var(--text-secondary);
   font-weight: 500;
   border-bottom: 1px solid var(--border-color);
@@ -122,6 +143,10 @@ h1, h2, h3, h4, h5, h6 {
   transition: var(--transition);
 }
 
+.grid-table tr:hover td {
+  background-color: rgba(255, 255, 255, 0.02);
+}
+
 .grid-table td:last-child,
 .grid-table th:last-child {
   border-right: none;
@@ -131,7 +156,7 @@ h1, h2, h3, h4, h5, h6 {
 .cell-input {
   width: 100%;
   height: 100%;
-  min-height: 44px;
+  min-height: 48px;
   padding: 0 16px;
   background-color: transparent;
   border: none;
@@ -139,11 +164,17 @@ h1, h2, h3, h4, h5, h6 {
   font-family: inherit;
   font-size: 13px;
   outline: none;
+  transition: var(--transition);
+}
+
+select option {
+  background-color: var(--bg-surface);
+  color: var(--text-primary);
 }
 
 .cell-input:focus {
-  background-color: rgba(255, 255, 255, 0.03);
-  box-shadow: inset 0 0 0 1px var(--text-secondary);
+  background-color: rgba(255, 255, 255, 0.04);
+  box-shadow: inset 0 0 0 1px var(--primary-blue);
 }
 
 .cell-input:disabled {
@@ -151,9 +182,18 @@ h1, h2, h3, h4, h5, h6 {
   background-color: var(--bg-surface);
 }
 
-.cell-text {
+/* Hide number input arrows */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+.grid-table td.cell-text {
   padding: 12px 16px;
-  display: block;
 }
 
 /* Badges */
