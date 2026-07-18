@@ -1,6 +1,6 @@
 import React from 'react';
 import { Clock } from 'lucide-react';
-import { useMockDB } from '../store/MockDBContext';
+import { useMockDB } from '../store/FirebaseDBContext';
 
 const HistoryLog = () => {
   const { logs, catalog } = useMockDB();

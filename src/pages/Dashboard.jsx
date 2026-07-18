@@ -1,11 +1,72 @@
 import React, { useState } from 'react';
-import { useMockDB } from '../store/MockDBContext';
+import { useMockDB } from '../store/FirebaseDBContext';
 import { Trash2, Clock } from 'lucide-react';
+
+const CustomSelect = ({ value, onChange, options, width }) => {
+  const [isOpen, setIsOpen] = React.useState(false);
+  const selectedOption = options.find(o => o.value === value);
+
+  return (
+    <div 
+      style={{ position: 'relative', cursor: 'pointer', width, outline: 'none' }}
+      onClick={() => setIsOpen(!isOpen)}
+      onBlur={() => setIsOpen(false)}
+      tabIndex={0}
+    >
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 8px', fontSize: '13px', color: 'var(--text-primary)' }}>
+        <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{selectedOption?.label}</span>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: '8px', color: 'var(--text-muted)' }}>
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </div>
+      
+      {isOpen && (
+        <div style={{
+          position: 'absolute',
+          top: 'calc(100% + 8px)',
+          left: 0,
+          minWidth: '100%',
+          backgroundColor: '#1e232b',
+          border: '1px solid var(--border-color)',
+          borderRadius: 'var(--radius-sm)',
+          boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.5)',
+          zIndex: 50,
+          maxHeight: '250px',
+          overflowY: 'auto',
+          padding: '4px 0'
+        }}>
+          {options.map(opt => (
+            <div 
+              key={opt.value}
+              onClick={(e) => { e.stopPropagation(); onChange(opt.value); setIsOpen(false); }}
+              style={{
+                padding: '8px 16px',
+                fontSize: '13px',
+                color: opt.value === value ? '#3b82f6' : '#c9d1d9',
+                backgroundColor: opt.value === value ? 'rgba(59, 130, 246, 0.1)' : 'transparent',
+                cursor: 'pointer',
+                whiteSpace: 'nowrap'
+              }}
+              onMouseOver={(e) => {
+                if (opt.value !== value) e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)';
+              }}
+              onMouseOut={(e) => {
+                if (opt.value !== value) e.currentTarget.style.backgroundColor = 'transparent';
+              }}
+            >
+              {opt.label}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
 
 const Dashboard = () => {
   const { catalog, stock, snapshots, getDashboardData, getFullInventory, clearData } = useMockDB();
-  const [selectedSnapshotId, setSelectedSnapshotId] = useState('LATEST');
-  const [filterMonth, setFilterMonth] = useState('ALL');
+  const [selectedSnapshotId, setSelectedSnapshotId] = React.useState('LATEST');
+  const [filterMonth, setFilterMonth] = React.useState('ALL');
 
   const availableMonths = [...new Set(snapshots.map(s => s.timestamp.substring(0, 7)))].sort().reverse();
   const filteredSnapshots = filterMonth === 'ALL' ? snapshots : snapshots.filter(s => s.timestamp.startsWith(filterMonth));
@@ -38,6 +99,19 @@ const Dashboard = () => {
     return date.toLocaleString('id-ID', { month: 'long', year: 'numeric' });
   };
 
+  const monthOptions = [
+    { value: 'ALL', label: 'Semua Bulan' },
+    ...availableMonths.map(m => ({ value: m, label: formatMonth(m) }))
+  ];
+
+  const snapshotOptions = [
+    { value: 'LATEST', label: 'Histori Terkini (Saat Ini)' },
+    ...[...filteredSnapshots].reverse().map(snap => ({
+      value: snap.id,
+      label: `${snap.title} (${formatDate(snap.timestamp)})`
+    }))
+  ];
+
   return (
     <div>
       <div className="topbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)', paddingBottom: '20px', marginBottom: '24px' }}>
@@ -48,36 +122,25 @@ const Dashboard = () => {
         </div>
         
         <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '0 12px', height: '38px', backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)' }}>
-            <Clock size={14} color="var(--text-secondary)" />
-            <select 
-              style={{ border: 'none', background: 'transparent', padding: '0', width: '130px', fontSize: '13px', color: 'var(--text-primary)', cursor: 'pointer', borderRight: '1px solid var(--border-color)', marginRight: '8px', outline: 'none' }}
-              value={filterMonth}
-              onChange={(e) => setFilterMonth(e.target.value)}
-            >
-              <option value="ALL">Semua Bulan</option>
-              {availableMonths.map(m => (
-                <option key={m} value={m}>{formatMonth(m)}</option>
-              ))}
-            </select>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '0 12px', height: '38px', backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)' }}>
+            <Clock size={14} color="var(--text-secondary)" style={{ marginRight: '4px' }} />
             
-            <select 
-              style={{ border: 'none', background: 'transparent', padding: '0', width: '200px', fontSize: '13px', color: 'var(--text-primary)', cursor: 'pointer', outline: 'none' }}
+            <CustomSelect 
+              width="130px"
+              value={filterMonth}
+              onChange={setFilterMonth}
+              options={monthOptions}
+            />
+            
+            <div style={{ width: '1px', height: '20px', backgroundColor: 'var(--border-color)', margin: '0 4px' }} />
+            
+            <CustomSelect 
+              width="240px"
               value={selectedSnapshotId}
-              onChange={(e) => setSelectedSnapshotId(e.target.value)}
-            >
-              <option value="LATEST">Histori Terkini (Saat Ini)</option>
-              {[...filteredSnapshots].reverse().map((snap, idx) => (
-                <option key={snap.id} value={snap.id}>
-                  {snap.title} ({formatDate(snap.timestamp)})
-                </option>
-              ))}
-            </select>
+              onChange={setSelectedSnapshotId}
+              options={snapshotOptions}
+            />
           </div>
-          
-          <button className="btn btn-outline" onClick={clearData} style={{ borderColor: 'var(--border-color)', height: '38px', padding: '0 16px' }}>
-            <Trash2 size={16} /> Reset
-          </button>
         </div>
       </div>
 

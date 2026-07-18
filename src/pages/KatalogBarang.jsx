@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { BookOpen, Trash2, Edit2, Check, X, Plus } from 'lucide-react';
-import { useMockDB } from '../store/MockDBContext';
+import { useMockDB } from '../store/FirebaseDBContext';
+import { toTitleCase } from '../utils';
 
 const KatalogBarang = () => {
   const { catalog, deleteCatalogItem, addCatalogItem, updateCatalogItem } = useMockDB();
@@ -79,16 +80,16 @@ const KatalogBarang = () => {
             {isAdding && (
               <tr style={{ backgroundColor: 'var(--bg-hover)' }}>
                 <td>
-                  <input className="cell-input" autoFocus placeholder="Nama barang..." value={addForm.name} onChange={e => setAddForm({...addForm, name: e.target.value})} />
+                  <input className="cell-input" autoFocus placeholder="Nama barang..." value={addForm.name} onChange={e => setAddForm({...addForm, name: toTitleCase(e.target.value)})} />
                 </td>
                 <td>
-                  <input className="cell-input" placeholder="Merek..." value={addForm.brand} onChange={e => setAddForm({...addForm, brand: e.target.value})} />
+                  <input className="cell-input" placeholder="Merek..." value={addForm.brand} onChange={e => setAddForm({...addForm, brand: toTitleCase(e.target.value)})} />
                 </td>
                 <td>
-                  <input className="cell-input" placeholder="Tipe/Model..." value={addForm.type} onChange={e => setAddForm({...addForm, type: e.target.value})} />
+                  <input className="cell-input" placeholder="Tipe/Model..." value={addForm.type} onChange={e => setAddForm({...addForm, type: toTitleCase(e.target.value)})} />
                 </td>
                 <td>
-                  <input className="cell-input" placeholder="Satuan..." value={addForm.unit} onChange={e => setAddForm({...addForm, unit: e.target.value})} />
+                  <input className="cell-input" placeholder="Satuan..." value={addForm.unit} onChange={e => setAddForm({...addForm, unit: toTitleCase(e.target.value)})} />
                 </td>
                 <td style={{ textAlign: 'center', verticalAlign: 'middle' }}>
                   <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
@@ -115,16 +116,16 @@ const KatalogBarang = () => {
                   return (
                     <tr key={item.id} style={{ backgroundColor: 'rgba(255, 255, 255, 0.02)' }}>
                       <td>
-                        <input className="cell-input" autoFocus value={editForm.name} onChange={e => setEditForm({...editForm, name: e.target.value})} />
+                        <input className="cell-input" autoFocus value={editForm.name} onChange={e => setEditForm({...editForm, name: toTitleCase(e.target.value)})} />
                       </td>
                       <td>
-                        <input className="cell-input" value={editForm.brand} onChange={e => setEditForm({...editForm, brand: e.target.value})} />
+                        <input className="cell-input" value={editForm.brand} onChange={e => setEditForm({...editForm, brand: toTitleCase(e.target.value)})} />
                       </td>
                       <td>
-                        <input className="cell-input" value={editForm.type} onChange={e => setEditForm({...editForm, type: e.target.value})} />
+                        <input className="cell-input" value={editForm.type} onChange={e => setEditForm({...editForm, type: toTitleCase(e.target.value)})} />
                       </td>
                       <td>
-                        <input className="cell-input" value={editForm.unit} onChange={e => setEditForm({...editForm, unit: e.target.value})} />
+                        <input className="cell-input" value={editForm.unit} onChange={e => setEditForm({...editForm, unit: toTitleCase(e.target.value)})} />
                       </td>
                       <td style={{ textAlign: 'center', verticalAlign: 'middle' }}>
                         <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>

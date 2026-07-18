@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { CheckSquare, Plus, Trash2 } from 'lucide-react';
 
-import { useMockDB } from '../store/MockDBContext';
+import { useMockDB } from '../store/FirebaseDBContext';
+import { toTitleCase } from '../utils';
 
 const InputFaktual = () => {
   const { catalog, saveFaktual, getFullInventory } = useMockDB();
@@ -37,7 +38,6 @@ const InputFaktual = () => {
       name: item.name,
       brand: item.brand,
       type: item.type,
-      type: item.type,
       unit: item.unit,
       qty_good: item.qty_good,
       qty_damaged: item.qty_damaged,
@@ -54,7 +54,8 @@ const InputFaktual = () => {
   const handleChange = (rowId, field, value) => {
     setRows(rows.map(row => {
       if (row.rowId === rowId) {
-        const updatedRow = { ...row, [field]: value };
+        const formattedValue = ['name', 'brand', 'type', 'unit'].includes(field) ? toTitleCase(value) : value;
+        const updatedRow = { ...row, [field]: formattedValue };
         
         // Autocomplete check
         if (field === 'name' || field === 'brand' || field === 'type') {
@@ -79,11 +80,11 @@ const InputFaktual = () => {
 
   const handleSave = () => {
     const validRows = rows.filter(r => r.name !== '' && (r.qty_good !== '' || r.qty_damaged !== ''));
-    if (validRows.length === 0) return alert('Belum ada data valid yang diisi.');
+    if (validRows.length === 0) return alert('Belum ada data audit yang valid.');
     
     saveFaktual(validRows);
     
-    alert('Disimpan: ' + validRows.length + ' baris barang ke Master Data');
+    alert('Disimpan: ' + validRows.length + ' baris audit');
     setRows([]); // Kosongkan lagi
   };
 

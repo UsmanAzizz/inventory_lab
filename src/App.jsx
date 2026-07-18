@@ -7,14 +7,29 @@ import InputFaktual from './pages/InputFaktual';
 import InputPembelian from './pages/InputPembelian';
 import InputRusak from './pages/InputRusak';
 import HistoryLog from './pages/HistoryLog';
-import { MockDBProvider } from './store/MockDBContext';
+import Login from './pages/Login';
+import { FirebaseDBProvider } from './store/FirebaseDBContext';
+import { Navigate } from 'react-router-dom';
+
+const ProtectedRoute = ({ children }) => {
+  const isAuth = localStorage.getItem('auth_token') === 'verified';
+  if (!isAuth) {
+    return <Navigate to="/login" replace />;
+  }
+  return children;
+};
 
 function App() {
   return (
-    <MockDBProvider>
+    <FirebaseDBProvider>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Layout />}>
+          <Route path="/login" element={<Login />} />
+          <Route path="/" element={
+            <ProtectedRoute>
+              <Layout />
+            </ProtectedRoute>
+          }>
             <Route index element={<Dashboard />} />
             <Route path="katalog" element={<KatalogBarang />} />
             <Route path="audit" element={<InputFaktual />} />
@@ -23,7 +38,7 @@ function App() {
           </Route>
         </Routes>
       </BrowserRouter>
-    </MockDBProvider>
+    </FirebaseDBProvider>
   );
 }
 

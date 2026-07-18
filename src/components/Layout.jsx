@@ -1,6 +1,6 @@
 import React from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, CheckSquare, ArrowDownRight, ArrowUpRight, Clock, BookOpen } from 'lucide-react';
+import { LayoutDashboard, CheckSquare, ArrowDownRight, ArrowUpRight, Clock, BookOpen, LogOut } from 'lucide-react';
 
 const Layout = () => {
   const location = useLocation();
@@ -73,6 +73,45 @@ const Layout = () => {
             );
           })}
         </nav>
+        <div style={{ marginTop: 'auto', padding: '0 12px' }}>
+          <button
+            onClick={() => {
+              if (window.confirm("Apakah Anda yakin ingin keluar?")) {
+                localStorage.removeItem('auth_token');
+                window.location.href = '/login';
+              }
+            }}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              padding: '10px 16px',
+              width: '100%',
+              borderRadius: 'var(--radius-sm)',
+              color: 'var(--text-secondary)',
+              backgroundColor: 'transparent',
+              border: 'none',
+              cursor: 'pointer',
+              fontSize: '13px',
+              fontWeight: '500',
+              textAlign: 'left',
+              transition: 'var(--transition)'
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.color = '#EF4444';
+              e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
+              e.currentTarget.querySelector('span').style.color = '#EF4444';
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.color = 'var(--text-secondary)';
+              e.currentTarget.style.backgroundColor = 'transparent';
+              e.currentTarget.querySelector('span').style.color = 'var(--text-muted)';
+            }}
+          >
+            <span style={{ color: 'var(--text-muted)', transition: 'var(--transition)' }}><LogOut size={16} /></span>
+            Logout / Kunci Layar
+          </button>
+        </div>
       </aside>
 
       {/* Main Content */}

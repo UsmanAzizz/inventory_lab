@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { ArrowDownRight, Plus, Trash2 } from 'lucide-react';
 
-import { useMockDB } from '../store/MockDBContext';
+import { useMockDB } from '../store/FirebaseDBContext';
+import { toTitleCase } from '../utils';
 
 const InputRusak = () => {
   const { catalog, saveRusak } = useMockDB();
@@ -15,6 +16,7 @@ const InputRusak = () => {
   const addRow = () => {
     setRows([{ 
       rowId: Date.now(), 
+      date: new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16),
       name: '', 
       brand: '', 
       type: '', 
@@ -32,7 +34,8 @@ const InputRusak = () => {
   const handleChange = (rowId, field, value) => {
     setRows(rows.map(row => {
       if (row.rowId === rowId) {
-        const updatedRow = { ...row, [field]: value };
+        const formattedValue = ['name', 'brand', 'type', 'unit', 'notes'].includes(field) ? toTitleCase(value) : value;
+        const updatedRow = { ...row, [field]: formattedValue };
         
         // Autocomplete check
         if (field === 'name' || field === 'brand' || field === 'type') {
@@ -98,8 +101,9 @@ const InputRusak = () => {
           <table className="grid-table" style={{ minWidth: '900px' }}>
             <thead>
               <tr>
+                <th style={{ width: '15%' }}>Waktu Transaksi</th>
                 <th style={{ width: '15%' }}>Nama Barang</th>
-                <th style={{ width: '15%' }}>Merek</th>
+                <th style={{ width: '10%' }}>Merek</th>
                 <th style={{ width: '15%' }}>Tipe/Model</th>
                 <th style={{ width: '10%' }}>Satuan</th>
                 <th style={{ width: '15%', color: '#EF4444' }}>Jumlah Rusak/Keluar</th>
@@ -110,6 +114,14 @@ const InputRusak = () => {
             <tbody>
               {rows.map((row) => (
                 <tr key={row.rowId}>
+                  <td>
+                    <input 
+                      type="datetime-local" 
+                      className="cell-input" 
+                      value={row.date}
+                      onChange={(e) => handleChange(row.rowId, 'date', e.target.value)}
+                    />
+                  </td>
                   <td>
                     <input 
                       type="text" 
