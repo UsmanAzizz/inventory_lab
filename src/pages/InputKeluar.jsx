@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { ArrowRightFromLine, Plus, Trash2 } from 'lucide-react';
+import { PackageMinus, Plus, Trash2 } from 'lucide-react';
 
 import { useMockDB } from '../store/FirebaseDBContext';
 import { toTitleCase } from '../utils';
+import toast from 'react-hot-toast';
 
 const InputKeluar = () => {
   const { catalog, saveKeluar } = useMockDB();
@@ -62,11 +63,11 @@ const InputKeluar = () => {
 
   const handleSave = () => {
     const validRows = rows.filter(r => r.name !== '' && r.qty_out !== '' && r.notes !== '');
-    if (validRows.length === 0) return alert('Belum ada data valid yang siap disimpan. Pastikan Keterangan terisi.');
+    if (validRows.length === 0) return toast.error('Belum ada data valid yang siap disimpan. Pastikan Keterangan terisi.');
     
     saveKeluar(validRows);
     
-    alert('Disimpan: ' + validRows.length + ' baris transaksi');
+    toast.success('Disimpan: ' + validRows.length + ' baris transaksi');
     setRows([]);
   };
 
@@ -75,7 +76,7 @@ const InputKeluar = () => {
       <div className="topbar" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '16px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
           <h2 className="page-title">
-            <ArrowRightFromLine size={20} color="#F59E0B" /> Catat Barang Keluar
+            <PackageMinus size={20} color="#F59E0B" /> Catat Barang Keluar
           </h2>
           <button className="btn btn-success" onClick={handleSave}>Simpan</button>
         </div>

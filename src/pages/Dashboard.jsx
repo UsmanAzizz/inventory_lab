@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useMockDB } from '../store/FirebaseDBContext';
-import { Trash2, Clock } from 'lucide-react';
+import { Trash2, Clock, LayoutDashboard } from 'lucide-react';
 
 const CustomSelect = ({ value, onChange, options, width }) => {
   const [isOpen, setIsOpen] = React.useState(false);
@@ -118,11 +118,20 @@ const Dashboard = () => {
 
   return (
     <div>
-      <div className="topbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)', paddingBottom: '20px', marginBottom: '24px' }}>
-        <div>
-          <h2 className="page-title" style={{ fontSize: '20px', fontWeight: '600', margin: 0 }}>
-            Overview Inventaris
+      <div className="topbar" style={{ height: '54px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <h2 className="page-title">
+            <LayoutDashboard size={20} color="var(--primary-blue)" /> Overview Inventaris
           </h2>
+          <span style={{ color: 'var(--border-focus)', fontSize: '14px' }}>|</span>
+          <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
+            {selectedSnapshotId === 'LATEST'
+              ? <span>Rekap Stok Saat Ini</span>
+              : currentSnapshot 
+                ? <span>Rekap Stok Saat <b>{currentSnapshot.title}</b> - {formatDate(currentSnapshot.timestamp)}</span>
+                : <span>Rekap Stok Saat Ini</span>
+            }
+          </div>
         </div>
         
         <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
@@ -147,19 +156,8 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
-
-      <div style={{ paddingBottom: '16px' }} />
-
-      <h3 style={{ marginBottom: '16px', fontSize: '14px', color: 'var(--text-secondary)' }}>
-        {selectedSnapshotId === 'LATEST'
-          ? <span>Rekap Stok Saat Ini</span>
-          : currentSnapshot 
-            ? <span>Rekap Stok Saat <b>{currentSnapshot.title}</b> ({formatDate(currentSnapshot.timestamp)})</span>
-            : <span>Rekap Stok Saat Ini</span>
-        }
-      </h3>
       
-      <div className="grid-container" style={{ overflowX: 'auto' }}>
+      <div className="grid-container" style={{ overflowX: 'auto', marginTop: '24px' }}>
         <table className="grid-table" style={{ minWidth: '900px' }}>
           <thead>
             <tr>

@@ -3,6 +3,7 @@ import { CheckSquare, Plus, Trash2 } from 'lucide-react';
 
 import { useMockDB } from '../store/FirebaseDBContext';
 import { toTitleCase } from '../utils';
+import toast from 'react-hot-toast';
 
 const InputFaktual = () => {
   const { catalog, saveFaktual, getFullInventory } = useMockDB();
@@ -29,7 +30,7 @@ const InputFaktual = () => {
   const loadLatestData = () => {
     const inventory = getFullInventory();
     if (inventory.length === 0) {
-      alert('Belum ada data stok/katalog sebelumnya.');
+      toast.error('Belum ada data stok/katalog sebelumnya.');
       return;
     }
     
@@ -80,11 +81,12 @@ const InputFaktual = () => {
 
   const handleSave = () => {
     const validRows = rows.filter(r => r.name !== '' && (r.qty_good !== '' || r.qty_damaged !== ''));
-    if (validRows.length === 0) return alert('Belum ada data audit yang valid.');
     
+    if (validRows.length === 0) return toast.error('Belum ada data audit yang valid.');
+
     saveFaktual(validRows);
     
-    alert('Disimpan: ' + validRows.length + ' baris audit');
+    toast.success('Disimpan: ' + validRows.length + ' baris audit');
     setRows([]); // Kosongkan lagi
   };
 

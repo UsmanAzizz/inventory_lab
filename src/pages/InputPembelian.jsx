@@ -3,6 +3,7 @@ import { ArrowUpRight, Plus, Trash2 } from 'lucide-react';
 
 import { useMockDB } from '../store/FirebaseDBContext';
 import { toTitleCase } from '../utils';
+import toast from 'react-hot-toast';
 
 const InputPembelian = () => {
   const { catalog, savePembelian } = useMockDB();
@@ -61,11 +62,11 @@ const InputPembelian = () => {
 
   const handleSave = () => {
     const validRows = rows.filter(r => r.name !== '' && r.qty_in !== '');
-    if (validRows.length === 0) return alert('Belum ada data valid yang siap disimpan.');
+    if (validRows.length === 0) return toast.error('Belum ada data valid yang siap disimpan.');
     
     savePembelian(validRows);
     
-    alert('Disimpan: ' + validRows.length + ' baris transaksi');
+    toast.success('Disimpan: ' + validRows.length + ' baris transaksi');
     setRows([]);
   };
 

@@ -3,6 +3,7 @@ import { ArrowDownRight, Plus, Trash2 } from 'lucide-react';
 
 import { useMockDB } from '../store/FirebaseDBContext';
 import { toTitleCase } from '../utils';
+import toast from 'react-hot-toast';
 
 const InputRusak = () => {
   const { catalog, saveRusak } = useMockDB();
@@ -60,11 +61,11 @@ const InputRusak = () => {
 
   const handleSave = () => {
     const validRows = rows.filter(r => r.name !== '' && r.qty_out !== '');
-    if (validRows.length === 0) return alert('Belum ada data kerusakan/keluar yang valid.');
+    if (validRows.length === 0) return toast.error('Belum ada data kerusakan/keluar yang valid.');
     
     saveRusak(validRows);
     
-    alert('Disimpan: ' + validRows.length + ' baris transaksi');
+    toast.success('Disimpan: ' + validRows.length + ' baris transaksi');
     setRows([]);
   };
 

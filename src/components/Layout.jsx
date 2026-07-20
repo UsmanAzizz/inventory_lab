@@ -1,22 +1,31 @@
 import React from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, CheckSquare, ArrowDownRight, ArrowUpRight, ArrowRightFromLine, Clock, BookOpen, LogOut, Printer } from 'lucide-react';
+import { LayoutDashboard, CheckSquare, ArrowDownRight, ArrowUpRight, PackageMinus, Clock, Box, LogOut, Printer } from 'lucide-react';
+import { useConfirm } from '../store/ConfirmDialogContext';
 
 const Layout = () => {
   const location = useLocation();
+  const { confirm } = useConfirm();
 
   const navItems = [
-    { path: '/', label: 'Overview', icon: <LayoutDashboard size={16} /> },
-    { path: '/katalog', label: 'Katalog Barang', icon: <BookOpen size={16} /> },
-    { path: '/audit', label: 'Audit Faktual', icon: <CheckSquare size={16} /> },
-    { path: '/purchase', label: 'Barang Masuk', icon: <ArrowUpRight size={16} /> },
-    { path: '/damage', label: 'Barang Rusak', icon: <ArrowDownRight size={16} /> },
-    { path: '/outbound', label: 'Barang Keluar', icon: <ArrowRightFromLine size={16} /> },
-    { path: '/laporan', label: 'Cetak Laporan', icon: <Printer size={16} /> },
+    { path: '/', label: 'Overview', icon: <LayoutDashboard size={16} />, activeColor: 'var(--primary-blue)', activeBg: 'rgba(59, 130, 246, 0.1)' },
+    { path: '/audit', label: 'Audit Faktual', icon: <CheckSquare size={16} />, activeColor: 'var(--primary-blue)', activeBg: 'rgba(59, 130, 246, 0.1)' },
+    { path: '/purchase', label: 'Barang Masuk', icon: <ArrowUpRight size={16} />, activeColor: '#10B981', activeBg: 'rgba(16, 185, 129, 0.1)' },
+    { path: '/damage', label: 'Barang Rusak', icon: <ArrowDownRight size={16} />, activeColor: '#EF4444', activeBg: 'rgba(239, 68, 68, 0.1)' },
+    { path: '/outbound', label: 'Barang Keluar', icon: <PackageMinus size={16} />, activeColor: '#F59E0B', activeBg: 'rgba(245, 158, 11, 0.1)' },
+    { path: '/katalog', label: 'Katalog Barang', icon: <Box size={16} />, activeColor: 'var(--primary-blue)', activeBg: 'rgba(59, 130, 246, 0.1)' },
+    { path: '/laporan', label: 'Cetak Laporan', icon: <Printer size={16} />, activeColor: 'var(--primary-blue)', activeBg: 'rgba(59, 130, 246, 0.1)' },
   ];
 
-  const handleLogout = () => {
-    if (window.confirm("Apakah Anda yakin ingin keluar?")) {
+  const handleLogout = async () => {
+    const isConfirmed = await confirm({
+      title: 'Konfirmasi Logout',
+      message: 'Apakah Anda yakin ingin keluar dari sesi saat ini?',
+      confirmText: 'Ya, Keluar',
+      cancelText: 'Batal'
+    });
+    
+    if (isConfirmed) {
       localStorage.removeItem('auth_token');
       window.location.href = '/login';
     }
@@ -66,6 +75,11 @@ const Layout = () => {
                   key={item.path}
                   to={item.path}
                   className={`nav-link ${isActive ? 'active' : ''}`}
+                  style={isActive ? { 
+                    color: item.activeColor,
+                    backgroundColor: item.activeBg,
+                    '--icon-color': item.activeColor 
+                  } : {}}
                 >
                   <span className="nav-icon">
                     {item.icon}

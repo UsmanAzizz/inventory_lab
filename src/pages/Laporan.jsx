@@ -63,9 +63,9 @@ const Laporan = () => {
     <div>
       {/* --- View Layar Utama (Non-Print) --- */}
       <div className="no-print">
-        <div className="topbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)', paddingBottom: '20px', marginBottom: '24px' }}>
-          <div>
-            <h2 className="page-title" style={{ fontSize: '20px', fontWeight: '600', margin: 0 }}>
+        <div className="topbar" style={{ height: '54px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', height: '38px' }}>
+            <h2 className="page-title">
               <Printer size={20} color="var(--primary-blue)" /> Arsip Laporan
             </h2>
           </div>

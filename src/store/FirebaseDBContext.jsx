@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { collection, doc, onSnapshot, writeBatch, deleteDoc, setDoc } from 'firebase/firestore';
 import { db } from '../firebase';
+import toast from 'react-hot-toast';
+import { useConfirm } from './ConfirmDialogContext';
 
 const FirebaseDBContext = createContext();
 
@@ -12,6 +14,7 @@ export const FirebaseDBProvider = ({ children }) => {
   const [logs, setLogs] = useState([]);
   const [snapshots, setSnapshots] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { confirm } = useConfirm();
 
   // Real-time Listeners
   useEffect(() => {
@@ -278,7 +281,7 @@ export const FirebaseDBProvider = ({ children }) => {
   const addCatalogItem = async (newItemData) => {
     const id = generateId(newItemData.name, newItemData.brand, newItemData.type);
     if (catalog.find(c => c.id === id)) {
-      alert("Barang dengan Nama, Merek, dan Tipe ini sudah ada di Master Data.");
+      toast.error("Barang dengan Nama, Merek, dan Tipe ini sudah ada di Master Data.");
       return false;
     }
 
@@ -301,12 +304,24 @@ export const FirebaseDBProvider = ({ children }) => {
   };
 
   const deleteCatalogItem = async (itemId) => {
-    if(window.confirm("Yakin ingin menghapus barang ini dari Master Data secara permanen? Stoknya juga akan hilang.")) {
+    const item = catalog.find(c => c.id === itemId);
+    const itemName = item ? item.name : 'Barang';
+    
+    const isConfirmed = await confirm({
+      title: `Hapus ${itemName}?`,
+      message: 'Barang ini akan dihapus dari daftar.',
+      confirmText: 'Ya, Hapus',
+      cancelText: 'Batal',
+      danger: true
+    });
+    
+    if(isConfirmed) {
       const batch = writeBatch(db);
       batch.delete(doc(db, 'catalog', itemId));
       batch.delete(doc(db, 'stock', itemId));
 
       await batch.commit();
+      toast.success('Barang berhasil dihapus permanen');
     }
   };
 
@@ -329,13 +344,22 @@ export const FirebaseDBProvider = ({ children }) => {
   };
 
   const clearData = async () => {
-    if(window.confirm("Hapus seluruh pangkalan data secara massal? Ini tidak bisa dikembalikan.")) {
+    const isConfirmed = await confirm({
+      title: 'Hapus Seluruh Data',
+      message: 'PERINGATAN: Tindakan ini akan menghapus seluruh isi pangkalan data, termasuk master data, riwayat mutasi, dan snapshot. Aksi ini tidak dapat dibatalkan.',
+      confirmText: 'Ya, Hapus Semua Data',
+      cancelText: 'Batal',
+      danger: true
+    });
+    
+    if(isConfirmed) {
       const batch = writeBatch(db);
       catalog.forEach(c => batch.delete(doc(db, 'catalog', c.id)));
       stock.forEach(s => batch.delete(doc(db, 'stock', s.itemId)));
       logs.forEach(l => batch.delete(doc(db, 'logs', l.id)));
       snapshots.forEach(s => batch.delete(doc(db, 'snapshots', s.id)));
       await batch.commit();
+      toast.success('Seluruh data berhasil dihapus');
     }
   };
 

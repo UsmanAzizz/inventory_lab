@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { BookOpen, Trash2, Edit2, Check, X, Plus } from 'lucide-react';
+import { Box, Trash2, Edit2, Check, X, Plus } from 'lucide-react';
 import { useMockDB } from '../store/FirebaseDBContext';
 import { toTitleCase } from '../utils';
+import toast from 'react-hot-toast';
 
 const KatalogBarang = () => {
   const { catalog, deleteCatalogItem, addCatalogItem, updateCatalogItem, loading } = useMockDB();
@@ -24,7 +25,7 @@ const KatalogBarang = () => {
 
   const saveEdit = () => {
     if (!editForm.name) {
-      alert("Nama barang wajib diisi!");
+      toast.error("Nama barang wajib diisi!");
       return;
     }
     updateCatalogItem(editId, editForm);
@@ -38,7 +39,7 @@ const KatalogBarang = () => {
 
   const saveAdd = () => {
     if (!addForm.name) {
-      alert("Nama barang wajib diisi!");
+      toast.error("Nama barang wajib diisi!");
       return;
     }
     const success = addCatalogItem(addForm);
@@ -50,12 +51,10 @@ const KatalogBarang = () => {
 
   return (
     <div>
-      <div className="topbar" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '16px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
-          <h2 className="page-title">
-            <BookOpen size={20} color="var(--primary-blue)" /> Katalog Master Barang
-          </h2>
-        </div>
+      <div className="topbar" style={{ height: '54px' }}>
+        <h2 className="page-title">
+          <Box size={20} color="var(--primary-blue)" /> Katalog Master Barang
+        </h2>
         <button 
           className="btn btn-outline" 
           onClick={() => setIsAdding(true)}
