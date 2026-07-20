@@ -123,8 +123,8 @@ const Dashboard = () => {
           <h2 className="page-title">
             <LayoutDashboard size={20} color="var(--primary-blue)" /> Overview Inventaris
           </h2>
-          <span style={{ color: 'var(--border-focus)', fontSize: '14px' }}>|</span>
-          <div style={{ fontSize: '13px', color: 'var(--text-secondary)', transform: 'translateY(3px)' }}>
+          <span style={{ color: 'var(--border-focus)', fontSize: '14px', transform: 'translateY(1px)' }}>|</span>
+          <div className="rekap-stok-text" style={{ fontSize: '13px', color: 'var(--text-secondary)', transform: 'translateY(2px)' }}>
             {selectedSnapshotId === 'LATEST'
               ? <span>Rekap Stok Saat Ini</span>
               : currentSnapshot 

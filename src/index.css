@@ -274,9 +274,13 @@ h1, h2, h3, h4, h5, h6 {
   
   /* Make the filter controls scrollable instead of overflowing the page */
   .topbar .mobile-scrollable {
-    overflow-x: hidden;
+    overflow: visible;
     padding-bottom: 4px;
     align-items: center !important;
+  }
+  
+  .rekap-stok-text {
+    transform: translateY(2px) !important;
   }
 
   /* Column width overrides on mobile to prevent columns from consuming the whole screen */
@@ -340,10 +344,12 @@ select option {
 input[type="number"]::-webkit-inner-spin-button,
 input[type="number"]::-webkit-outer-spin-button {
   -webkit-appearance: none;
+  appearance: none;
   margin: 0;
 }
 input[type="number"] {
   -moz-appearance: textfield;
+  appearance: textfield;
 }
 
 .grid-table td.cell-text {
