@@ -124,7 +124,7 @@ const Dashboard = () => {
             <LayoutDashboard size={20} color="var(--primary-blue)" /> Overview Inventaris
           </h2>
           <span style={{ color: 'var(--border-focus)', fontSize: '14px' }}>|</span>
-          <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
+          <div style={{ fontSize: '13px', color: 'var(--text-secondary)', transform: 'translateY(3px)' }}>
             {selectedSnapshotId === 'LATEST'
               ? <span>Rekap Stok Saat Ini</span>
               : currentSnapshot 
@@ -134,25 +134,29 @@ const Dashboard = () => {
           </div>
         </div>
         
-        <div className="mobile-scrollable" style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '0 12px', height: '38px', backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)' }}>
-            <Clock size={14} color="var(--text-secondary)" style={{ marginRight: '4px' }} />
+        <div className="mobile-scrollable filter-container-wrapper" style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+          <div className="filter-container" style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '0 12px', height: '38px', backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)' }}>
+            <Clock size={14} color="var(--text-secondary)" style={{ marginRight: '4px', flexShrink: 0 }} />
             
-            <CustomSelect 
-              width="min(130px, 35vw)"
-              value={filterMonth}
-              onChange={setFilterMonth}
-              options={monthOptions}
-            />
+            <div className="filter-month">
+              <CustomSelect 
+                width="100%"
+                value={filterMonth}
+                onChange={setFilterMonth}
+                options={monthOptions}
+              />
+            </div>
             
-            <div style={{ width: '1px', height: '20px', backgroundColor: 'var(--border-color)', margin: '0 4px' }} />
+            <div style={{ width: '1px', height: '20px', backgroundColor: 'var(--border-color)', margin: '0 4px', flexShrink: 0 }} />
             
-            <CustomSelect 
-              width="min(240px, 45vw)"
-              value={selectedSnapshotId}
-              onChange={setSelectedSnapshotId}
-              options={snapshotOptions}
-            />
+            <div className="filter-kondisi">
+              <CustomSelect 
+                width="100%"
+                value={selectedSnapshotId}
+                onChange={setSelectedSnapshotId}
+                options={snapshotOptions}
+              />
+            </div>
           </div>
         </div>
       </div>

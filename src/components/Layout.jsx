@@ -1,6 +1,6 @@
 import React from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, CheckSquare, ArrowDownRight, ArrowUpRight, PackageMinus, Clock, Box, LogOut, Printer } from 'lucide-react';
+import { LayoutDashboard, CheckSquare, ArrowDownRight, ArrowUpRight, PackageMinus, Clock, Box, LogOut, Printer, Power } from 'lucide-react';
 import { useConfirm } from '../store/ConfirmDialogContext';
 
 const Layout = () => {
@@ -46,7 +46,7 @@ const Layout = () => {
           onClick={handleLogout}
           style={{ background: 'transparent', border: 'none', color: '#EF4444', padding: '8px' }}
         >
-          <LogOut size={18} />
+          <Power size={18} />
         </button>
       </header>
 
@@ -93,36 +93,10 @@ const Layout = () => {
           <div style={{ marginTop: 'auto', padding: '0 12px' }}>
             <button
               onClick={handleLogout}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-                padding: '10px 16px',
-                width: '100%',
-                borderRadius: 'var(--radius-sm)',
-                color: 'var(--text-secondary)',
-                backgroundColor: 'transparent',
-                border: 'none',
-                cursor: 'pointer',
-                fontSize: '13px',
-                fontFamily: 'inherit',
-                fontWeight: '500',
-                textAlign: 'left',
-                transition: 'var(--transition)'
-              }}
-              onMouseOver={(e) => {
-                e.currentTarget.style.color = 'white';
-                e.currentTarget.style.backgroundColor = '#EF4444';
-                e.currentTarget.querySelector('span').style.color = 'white';
-              }}
-              onMouseOut={(e) => {
-                e.currentTarget.style.color = 'var(--text-secondary)';
-                e.currentTarget.style.backgroundColor = 'transparent';
-                e.currentTarget.querySelector('span').style.color = 'var(--text-muted)';
-              }}
+              className="desktop-logout-btn"
             >
-              <span style={{ color: 'var(--text-muted)', transition: 'var(--transition)' }}><LogOut size={16} /></span>
-              Logout
+              <span className="logout-icon"><Power size={18} /></span>
+              <span className="logout-text">Logout</span>
             </button>
           </div>
         </aside>
@@ -148,8 +122,9 @@ const Layout = () => {
               <div className="icon-wrapper">
                 {item.icon}
               </div>
-              <span style={{ fontSize: '10px', marginTop: '2px' }}>
-                {item.label === 'Barang Rusak/Keluar' ? 'Keluar' : 
+              <span style={{ fontSize: '10px', marginTop: '2px', fontWeight: '500' }}>
+                {item.label === 'Barang Keluar' ? 'Keluar' : 
+                 item.label === 'Barang Rusak' ? 'Rusak' : 
                  item.label === 'Katalog Barang' ? 'Katalog' :
                  item.label === 'Audit Faktual' ? 'Audit' :
                  item.label === 'Barang Masuk' ? 'Masuk' : 
