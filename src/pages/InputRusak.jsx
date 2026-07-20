@@ -71,26 +71,22 @@ const InputRusak = () => {
 
   return (
     <div>
-      <div className="topbar" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '16px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
+      <div className="topbar" style={{ height: '54px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', height: '38px' }}>
           <h2 className="page-title">
             <ArrowDownRight size={20} color="#EF4444" /> Catat Barang Rusak
           </h2>
-          <button className="btn btn-success" onClick={handleSave}>Simpan</button>
         </div>
-        <button className="btn btn-outline" onClick={addRow}>
-          <Plus size={16} /> Tambah Baris Barang
-        </button>
+        <div style={{ display: 'flex', gap: '12px' }}>
+          <button className="btn btn-outline" onClick={addRow}>
+            <Plus size={16} /> Tambah Baris Transaksi
+          </button>
+          <button className="btn btn-primary" onClick={handleSave}>Simpan</button>
+        </div>
       </div>
 
       <datalist id="catalog-names">
         {uniqueNames.map((n, i) => <option key={i} value={n} />)}
-      </datalist>
-      <datalist id="catalog-brands">
-        {uniqueBrands.map((b, i) => <option key={i} value={b} />)}
-      </datalist>
-      <datalist id="catalog-types">
-        {uniqueTypes.map((t, i) => <option key={i} value={t} />)}
       </datalist>
 
       {rows.length === 0 ? (
@@ -124,19 +120,25 @@ const InputRusak = () => {
                     />
                   </td>
                   <td>
+                    <datalist id={`brands-${row.rowId}`}>
+                      {(row.name ? [...new Set(catalog.filter(c => c.name.toLowerCase() === row.name.toLowerCase() && c.brand).map(c => c.brand))] : uniqueBrands).map((b, i) => <option key={i} value={b} />)}
+                    </datalist>
                     <input 
                       type="text" 
                       className="cell-input" 
-                      list="catalog-brands"
+                      list={`brands-${row.rowId}`}
                       value={row.brand}
                       onChange={(e) => handleChange(row.rowId, 'brand', e.target.value)}
                     />
                   </td>
                   <td>
+                    <datalist id={`types-${row.rowId}`}>
+                      {(row.name ? [...new Set(catalog.filter(c => c.name.toLowerCase() === row.name.toLowerCase() && c.brand).map(c => c.type))] : uniqueTypes).map((t, i) => <option key={i} value={t} />)}
+                    </datalist>
                     <input 
                       type="text" 
                       className="cell-input" 
-                      list="catalog-types"
+                      list={`types-${row.rowId}`}
                       value={row.type}
                       onChange={(e) => handleChange(row.rowId, 'type', e.target.value)}
                     />

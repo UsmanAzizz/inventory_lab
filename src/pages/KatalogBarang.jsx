@@ -13,6 +13,10 @@ const KatalogBarang = () => {
   const [isAdding, setIsAdding] = useState(false);
   const [addForm, setAddForm] = useState({ name: '', brand: '', type: '', unit: 'Unit' });
 
+  const uniqueNames = [...new Set(catalog.map(c => c.name))].filter(Boolean);
+  const uniqueBrands = [...new Set(catalog.map(c => c.brand))].filter(Boolean);
+  const uniqueTypes = [...new Set(catalog.map(c => c.type))].filter(Boolean);
+
   const startEdit = (item) => {
     setEditId(item.id);
     setEditForm({ name: item.name, brand: item.brand, type: item.type, unit: item.unit });
@@ -79,13 +83,22 @@ const KatalogBarang = () => {
             {isAdding && (
               <tr style={{ backgroundColor: 'var(--bg-hover)' }}>
                 <td>
-                  <input className="cell-input" autoFocus placeholder="Nama barang..." value={addForm.name} onChange={e => setAddForm({...addForm, name: toTitleCase(e.target.value)})} />
+                  <datalist id="catalog-names">
+                    {uniqueNames.map((n, i) => <option key={i} value={n} />)}
+                  </datalist>
+                  <input className="cell-input" autoFocus list="catalog-names" placeholder="Nama barang..." value={addForm.name} onChange={e => setAddForm({...addForm, name: toTitleCase(e.target.value)})} />
                 </td>
                 <td>
-                  <input className="cell-input" placeholder="Merek..." value={addForm.brand} onChange={e => setAddForm({...addForm, brand: toTitleCase(e.target.value)})} />
+                  <datalist id="add-brands">
+                    {(addForm.name ? [...new Set(catalog.filter(c => c.name.toLowerCase() === addForm.name.toLowerCase() && c.brand).map(c => c.brand))] : uniqueBrands).map((b, i) => <option key={i} value={b} />)}
+                  </datalist>
+                  <input className="cell-input" list="add-brands" placeholder="Merek..." value={addForm.brand} onChange={e => setAddForm({...addForm, brand: toTitleCase(e.target.value)})} />
                 </td>
                 <td>
-                  <input className="cell-input" placeholder="Tipe/Model..." value={addForm.type} onChange={e => setAddForm({...addForm, type: toTitleCase(e.target.value)})} />
+                  <datalist id="add-types">
+                    {(addForm.name ? [...new Set(catalog.filter(c => c.name.toLowerCase() === addForm.name.toLowerCase() && c.brand).map(c => c.type))] : uniqueTypes).map((t, i) => <option key={i} value={t} />)}
+                  </datalist>
+                  <input className="cell-input" list="add-types" placeholder="Tipe/Model..." value={addForm.type} onChange={e => setAddForm({...addForm, type: toTitleCase(e.target.value)})} />
                 </td>
                 <td>
                   <input className="cell-input" placeholder="Satuan..." value={addForm.unit} onChange={e => setAddForm({...addForm, unit: toTitleCase(e.target.value)})} />
@@ -121,13 +134,19 @@ const KatalogBarang = () => {
                   return (
                     <tr key={item.id} style={{ backgroundColor: 'rgba(255, 255, 255, 0.02)' }}>
                       <td>
-                        <input className="cell-input" autoFocus value={editForm.name} onChange={e => setEditForm({...editForm, name: toTitleCase(e.target.value)})} />
+                        <input className="cell-input" autoFocus list="catalog-names" value={editForm.name} onChange={e => setEditForm({...editForm, name: toTitleCase(e.target.value)})} />
                       </td>
                       <td>
-                        <input className="cell-input" value={editForm.brand} onChange={e => setEditForm({...editForm, brand: toTitleCase(e.target.value)})} />
+                        <datalist id={`edit-brands-${item.id}`}>
+                          {(editForm.name ? [...new Set(catalog.filter(c => c.name.toLowerCase() === editForm.name.toLowerCase() && c.brand).map(c => c.brand))] : uniqueBrands).map((b, i) => <option key={i} value={b} />)}
+                        </datalist>
+                        <input className="cell-input" list={`edit-brands-${item.id}`} value={editForm.brand} onChange={e => setEditForm({...editForm, brand: toTitleCase(e.target.value)})} />
                       </td>
                       <td>
-                        <input className="cell-input" value={editForm.type} onChange={e => setEditForm({...editForm, type: toTitleCase(e.target.value)})} />
+                        <datalist id={`edit-types-${item.id}`}>
+                          {(editForm.name ? [...new Set(catalog.filter(c => c.name.toLowerCase() === editForm.name.toLowerCase() && c.brand).map(c => c.type))] : uniqueTypes).map((t, i) => <option key={i} value={t} />)}
+                        </datalist>
+                        <input className="cell-input" list={`edit-types-${item.id}`} value={editForm.type} onChange={e => setEditForm({...editForm, type: toTitleCase(e.target.value)})} />
                       </td>
                       <td>
                         <input className="cell-input" value={editForm.unit} onChange={e => setEditForm({...editForm, unit: toTitleCase(e.target.value)})} />

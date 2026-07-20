@@ -15,3 +15,13 @@ Istilah untuk keselarasan tata letak (layout) yang sangat presisi biasanya diseb
    Pengaturan jarak (margin/padding) yang konsisten secara vertikal di seluruh halaman aplikasi, sehingga ritme visual ketika pengguna melakukan *scrolling* terasa natural dan tidak berantakan.
 
 Dalam kasus perbaikan *topbar* dan tabel sebelumnya, masalah yang terjadi adalah adanya **"Layout Shift"** (pergeseran tata letak) yang sangat kecil saat pindah antar-tab. Dengan mengunci ukuran elemen dan margin menjadi nilai yang mutlak (*fixed height*), kita berhasil mencapai *Pixel-Perfect Spatial Consistency*.
+
+---
+
+## TODO / Hal untuk Dipikirkan Nanti
+
+- **Penanganan Barang Redundan / Bahan Habis Pakai (BHP) di Lab**
+  - **Masalah:** Ada barang-barang praktik (contoh: potongan kabel sisa *crimping*, timah solder, *cable ties*) yang masih diakui dan digunakan di lab, tetapi sangat sulit (dan merepotkan) untuk dihitung/di-track satu per satu di sistem.
+  - **Solusi Alternatif untuk Nanti:** 
+    - Abaikan saja pencatatannya dari sistem inventaris (anggap sebagai *overhead* atau barang bebas pakai).
+    - Atau, tambahkan klasifikasi "Lot / Box" (tidak dilacak per satuan/pieces) agar admin tidak kelelahan melakukan *data entry*.
