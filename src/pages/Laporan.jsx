@@ -118,9 +118,9 @@ const Laporan = () => {
             <table className="grid-table" style={{ minWidth: '600px', width: '100%', fontSize: '13px' }}>
               <thead>
                 <tr>
-                  <th style={{ width: '40%', textAlign: 'left' }}>Jenis Mutasi</th>
-                  <th style={{ width: '40%', textAlign: 'left' }}>Waktu Pencatatan</th>
-                  <th style={{ width: '20%', textAlign: 'center' }}>Aksi</th>
+                  <th className="col-mutasi-type">Jenis Mutasi</th>
+                  <th className="col-mutasi-time">Waktu Pencatatan</th>
+                  <th className="col-mutasi-action">Aksi</th>
                 </tr>
               </thead>
               <tbody>
@@ -198,12 +198,12 @@ const Laporan = () => {
               <table className="pdf-table" style={{ width: '100%', fontSize: '12px' }}>
                 <thead>
                   <tr style={{ backgroundColor: '#f0f0f0' }}>
-                    <th style={{ width: '25%', color: 'black', textAlign: 'left' }}>Katalog Barang</th>
-                    <th style={{ width: '15%', color: 'black', textAlign: 'center' }}>Merek</th>
-                    <th style={{ width: '15%', color: 'black', textAlign: 'center' }}>Tipe/Model</th>
-                    <th style={{ width: '15%', color: 'black', textAlign: 'center' }}>Satuan</th>
-                    <th style={{ width: '15%', color: 'black', textAlign: 'center' }}>Stok Baik</th>
-                    <th style={{ width: '15%', color: 'black', textAlign: 'center' }}>Stok Rusak</th>
+                    <th className="col-name-lap">Nama Barang</th>
+                    <th className="col-brand-lap">Merek</th>
+                    <th className="col-model-lap">Tipe/Model</th>
+                    <th className="col-unit-lap">Satuan</th>
+                    <th className="col-good-lap">Stok Baik</th>
+                    <th className="col-bad-lap">Stok Rusak</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -280,12 +280,12 @@ const Laporan = () => {
           <table className="pdf-table" style={{ width: '100%', fontSize: '12px' }}>
             <thead>
               <tr style={{ backgroundColor: '#f0f0f0' }}>
-                <th style={{ width: '25%', color: 'black', textAlign: 'left' }}>Katalog Barang</th>
-                <th style={{ width: '15%', color: 'black', textAlign: 'center' }}>Merek</th>
-                <th style={{ width: '15%', color: 'black', textAlign: 'center' }}>Tipe/Model</th>
-                <th style={{ width: '15%', color: 'black', textAlign: 'center' }}>Satuan</th>
-                <th style={{ width: '15%', color: '#10B981', textAlign: 'center' }}>Stok Baik</th>
-                <th style={{ width: '15%', color: '#EF4444', textAlign: 'center' }}>Stok Rusak</th>
+                <th className="col-name-lap">Nama Barang</th>
+                <th className="col-brand-lap">Merek</th>
+                <th className="col-model-lap">Tipe/Model</th>
+                <th className="col-unit-lap">Satuan</th>
+                <th className="col-good-lap" style={{ color: '#10B981' }}>Stok Baik</th>
+                <th className="col-bad-lap" style={{ color: '#EF4444' }}>Stok Rusak</th>
               </tr>
             </thead>
             <tbody>

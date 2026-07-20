@@ -134,12 +134,12 @@ const Dashboard = () => {
           </div>
         </div>
         
-        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+        <div className="mobile-scrollable" style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '0 12px', height: '38px', backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)' }}>
             <Clock size={14} color="var(--text-secondary)" style={{ marginRight: '4px' }} />
             
             <CustomSelect 
-              width="130px"
+              width="min(130px, 35vw)"
               value={filterMonth}
               onChange={setFilterMonth}
               options={monthOptions}
@@ -148,7 +148,7 @@ const Dashboard = () => {
             <div style={{ width: '1px', height: '20px', backgroundColor: 'var(--border-color)', margin: '0 4px' }} />
             
             <CustomSelect 
-              width="240px"
+              width="min(240px, 45vw)"
               value={selectedSnapshotId}
               onChange={setSelectedSnapshotId}
               options={snapshotOptions}
@@ -161,12 +161,12 @@ const Dashboard = () => {
         <table className="grid-table" style={{ minWidth: '900px' }}>
           <thead>
             <tr>
-              <th style={{ width: '25%' }}>Katalog Barang</th>
-              <th style={{ width: '15%' }}>Merek</th>
-              <th style={{ width: '15%' }}>Tipe/Model</th>
-              <th style={{ width: '15%' }}>Satuan</th>
-              <th style={{ width: '15%', color: '#10B981' }}>Stok Baik</th>
-              <th style={{ width: '15%', color: '#EF4444' }}>Stok Rusak</th>
+              <th className="col-name">Nama Barang</th>
+              <th className="col-brand">Merek</th>
+              <th className="col-model">Tipe/Model</th>
+              <th className="col-unit">Satuan</th>
+              <th className="col-good" style={{ color: '#10B981' }}>Stok Baik</th>
+              <th className="col-bad" style={{ color: '#EF4444' }}>Stok Rusak</th>
             </tr>
           </thead>
           <tbody>

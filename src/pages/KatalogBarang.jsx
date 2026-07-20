@@ -68,11 +68,11 @@ const KatalogBarang = () => {
         <table className="grid-table" style={{ minWidth: '800px' }}>
           <thead>
             <tr>
-              <th style={{ width: '30%' }}>Nama Barang</th>
-              <th style={{ width: '25%' }}>Merek</th>
-              <th style={{ width: '25%' }}>Tipe/Model</th>
-              <th style={{ width: '10%' }}>Satuan</th>
-              <th style={{ width: '10%', textAlign: 'center' }}>Aksi</th>
+              <th className="col-name">Nama Barang</th>
+              <th className="col-brand-kat">Merek</th>
+              <th className="col-model-kat">Tipe/Model</th>
+              <th className="col-unit-kat">Satuan</th>
+              <th className="col-action">Aksi</th>
             </tr>
           </thead>
           <tbody>
