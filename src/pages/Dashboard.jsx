@@ -30,7 +30,7 @@ const Dashboard = () => {
     ? (Array.isArray(currentSnapshot.catalog_state) ? currentSnapshot.catalog_state : Object.values(currentSnapshot.catalog_state || {})) 
     : catalog;
 
-  const inventory = getFullInventory(targetStock, targetCatalog);
+  const inventory = getFullInventory(targetStock, targetCatalog).sort((a, b) => a.name.localeCompare(b.name));
 
   const formatDate = (isoString) => {
     const d = new Date(isoString);
@@ -66,27 +66,27 @@ const Dashboard = () => {
       <div className="topbar">
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <h2 className="page-title">
-            <LayoutDashboard size={20} color="var(--primary-blue)" /> Overview Inventaris
+            <LayoutDashboard size={20} color="var(--primary-blue)" /> Overview
           </h2>
           <span style={{ color: 'var(--border-focus)', fontSize: '14px', transform: 'translateY(1px)' }}>|</span>
           <div className="rekap-stok-text" style={{ fontSize: '13px', color: 'var(--text-secondary)', transform: 'translateY(2px)' }}>
             {selectedSnapshotId === 'LATEST'
               ? <span>Kondisi Terkini</span>
               : currentSnapshot 
-                ? <span><b>{currentSnapshot.title}</b> - {formatDate(currentSnapshot.timestamp)}</span>
+                ? <span>{currentSnapshot.title ? <><b style={{ color: 'var(--text-primary)' }}>{currentSnapshot.title}</b> - </> : ''}{formatDate(currentSnapshot.timestamp)}</span>
                 : <span>Kondisi Terkini</span>
             }
           </div>
         </div>
         
-        <div style={{ display: 'flex', gap: '8px' }}>
+        {/* <div style={{ display: 'flex', gap: '8px' }}>
           <button className="btn btn-warning" style={{ display: 'flex', alignItems: 'center', gap: '6px' }} onClick={seedDatabase}>
             <Clock size={16} /> Seed Database
           </button>
           <button className="btn btn-danger" style={{ display: 'flex', alignItems: 'center', gap: '6px' }} onClick={clearData}>
             <Trash2 size={16} /> Reset
           </button>
-        </div>
+        </div> */}
         
         <div className="mobile-scrollable filter-container-wrapper" style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
           <div className="filter-container" style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '0 12px', height: '38px', backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)' }}>
@@ -116,16 +116,16 @@ const Dashboard = () => {
       </div>
       
       <div className="page-content">
-        <div className="grid-container" style={{ overflowX: 'auto', marginTop: '24px' }}>
+        <div className="grid-container" style={{ overflowX: 'auto' }}>
         <table className="grid-table" style={{ minWidth: '900px' }}>
           <thead>
             <tr>
               <th className="col-name">Nama Barang</th>
               <th className="col-brand">Merek</th>
               <th className="col-model">Tipe/Model</th>
-              <th className="col-unit">Satuan</th>
-              <th className="col-good" style={{ color: '#10B981' }}>Stok Baik</th>
-              <th className="col-bad" style={{ color: '#EF4444' }}>Stok Rusak</th>
+              <th className="col-unit" style={{ textAlign: 'center' }}>Satuan</th>
+              <th className="col-good" style={{ color: '#10B981', textAlign: 'center' }}>Stok Baik</th>
+              <th className="col-bad" style={{ color: '#EF4444', textAlign: 'center' }}>Stok Rusak</th>
             </tr>
           </thead>
           <tbody>
@@ -147,9 +147,9 @@ const Dashboard = () => {
                   <td className="cell-text" style={{ color: 'var(--text-primary)' }}>{item.name}</td>
                   <td className="cell-text">{item.brand}</td>
                   <td className="cell-text">{item.type}</td>
-                  <td className="cell-text"><span className="badge badge-blue">{item.unit}</span></td>
-                  <td className="cell-text">{item.qty_good}</td>
-                  <td className="cell-text">{item.qty_damaged}</td>
+                  <td className="cell-text" style={{ textAlign: 'center' }}><span className="badge badge-blue">{item.unit}</span></td>
+                  <td className="cell-text" style={{ textAlign: 'center' }}>{item.qty_good}</td>
+                  <td className="cell-text" style={{ textAlign: 'center' }}>{item.qty_damaged}</td>
                 </tr>
               ))
             )}

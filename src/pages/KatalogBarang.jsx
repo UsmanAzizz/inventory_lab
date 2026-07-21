@@ -73,13 +73,13 @@ const KatalogBarang = () => {
       </div>
 
       <div className="page-content">
-        <div className="grid-container" style={{ overflowX: 'auto', marginTop: '24px' }}>
+        <div className="grid-container" style={{ overflowX: 'auto' }}>
         <table className="grid-table" style={{ minWidth: '800px' }}>
           <thead>
             <tr>
               <th className="col-name">Nama Barang</th>
-              <th className="col-brand-kat" style={{ textAlign: 'center' }}>Merek</th>
-              <th className="col-model-kat" style={{ textAlign: 'center' }}>Tipe/Model</th>
+              <th className="col-brand-kat">Merek</th>
+              <th className="col-model-kat">Tipe/Model</th>
               <th className="col-unit-kat" style={{ textAlign: 'center' }}>Satuan</th>
               <th className="col-action" style={{ textAlign: 'center' }}>Aksi</th>
             </tr>
@@ -93,17 +93,17 @@ const KatalogBarang = () => {
                   </datalist>
                   <input className="cell-input" autoFocus list="catalog-names" placeholder="Nama barang..." value={addForm.name} onChange={e => setAddForm({...addForm, name: toTitleCase(e.target.value)})} />
                 </td>
-                <td style={{ textAlign: 'center' }}>
+                <td>
                   <datalist id="add-brands">
                     {(addForm.name ? [...new Set(activeCatalog.filter(c => c.name.toLowerCase() === addForm.name.toLowerCase() && c.brand).map(c => c.brand))] : uniqueBrands).map((b, i) => <option key={i} value={b} />)}
                   </datalist>
-                  <input className="cell-input" style={{ textAlign: 'center' }} list="add-brands" placeholder="Merek..." value={addForm.brand} onChange={e => setAddForm({...addForm, brand: toTitleCase(e.target.value)})} />
+                  <input className="cell-input" list="add-brands" placeholder="Merek..." value={addForm.brand} onChange={e => setAddForm({...addForm, brand: toTitleCase(e.target.value)})} />
                 </td>
-                <td style={{ textAlign: 'center' }}>
+                <td>
                   <datalist id="add-types">
                     {(addForm.name ? [...new Set(activeCatalog.filter(c => c.name.toLowerCase() === addForm.name.toLowerCase() && c.brand).map(c => c.type))] : uniqueTypes).map((t, i) => <option key={i} value={t} />)}
                   </datalist>
-                  <input className="cell-input" style={{ textAlign: 'center' }} list="add-types" placeholder="Tipe/Model..." value={addForm.type} onChange={e => setAddForm({...addForm, type: toTitleCase(e.target.value)})} />
+                  <input className="cell-input" list="add-types" placeholder="Tipe/Model..." value={addForm.type} onChange={e => setAddForm({...addForm, type: toTitleCase(e.target.value)})} />
                 </td>
                 <td style={{ textAlign: 'center' }}>
                   <input className="cell-input" style={{ textAlign: 'center' }} placeholder="Satuan..." value={addForm.unit} onChange={e => setAddForm({...addForm, unit: toTitleCase(e.target.value)})} />
@@ -138,17 +138,17 @@ const KatalogBarang = () => {
                       <td>
                         <input className="cell-input" autoFocus list="catalog-names" value={editForm.name} onChange={e => setEditForm({...editForm, name: toTitleCase(e.target.value)})} />
                       </td>
-                      <td style={{ textAlign: 'center' }}>
+                      <td>
                         <datalist id={`edit-brands-${item.id}`}>
                           {(editForm.name ? [...new Set(activeCatalog.filter(c => c.name.toLowerCase() === editForm.name.toLowerCase() && c.brand).map(c => c.brand))] : uniqueBrands).map((b, i) => <option key={i} value={b} />)}
                         </datalist>
-                        <input className="cell-input" style={{ textAlign: 'center' }} list={`edit-brands-${item.id}`} value={editForm.brand} onChange={e => setEditForm({...editForm, brand: toTitleCase(e.target.value)})} />
+                        <input className="cell-input" list={`edit-brands-${item.id}`} value={editForm.brand} onChange={e => setEditForm({...editForm, brand: toTitleCase(e.target.value)})} />
                       </td>
-                      <td style={{ textAlign: 'center' }}>
+                      <td>
                         <datalist id={`edit-types-${item.id}`}>
                           {(editForm.name ? [...new Set(activeCatalog.filter(c => c.name.toLowerCase() === editForm.name.toLowerCase() && c.brand).map(c => c.type))] : uniqueTypes).map((t, i) => <option key={i} value={t} />)}
                         </datalist>
-                        <input className="cell-input" style={{ textAlign: 'center' }} list={`edit-types-${item.id}`} value={editForm.type} onChange={e => setEditForm({...editForm, type: toTitleCase(e.target.value)})} />
+                        <input className="cell-input" list={`edit-types-${item.id}`} value={editForm.type} onChange={e => setEditForm({...editForm, type: toTitleCase(e.target.value)})} />
                       </td>
                       <td style={{ textAlign: 'center' }}>
                         <input className="cell-input" style={{ textAlign: 'center' }} value={editForm.unit} onChange={e => setEditForm({...editForm, unit: toTitleCase(e.target.value)})} />
@@ -170,8 +170,8 @@ const KatalogBarang = () => {
                 return (
                   <tr key={item.id}>
                     <td className="cell-text" style={{ color: 'var(--text-primary)', fontWeight: '500' }}>{item.name}</td>
-                    <td className="cell-text" style={{ textAlign: 'center' }}>{item.brand}</td>
-                    <td className="cell-text" style={{ textAlign: 'center' }}>{item.type}</td>
+                    <td className="cell-text">{item.brand}</td>
+                    <td className="cell-text">{item.type}</td>
                     <td className="cell-text" style={{ textAlign: 'center' }}><span className="badge badge-blue">{item.unit}</span></td>
                     <td style={{ textAlign: 'center', verticalAlign: 'middle' }}>
                       <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>

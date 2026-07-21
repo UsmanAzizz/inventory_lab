@@ -325,6 +325,69 @@ export const FirebaseDBProvider = ({ children }) => {
     }
   };
 
+  const deleteLog = async (logId) => {
+    const log = logs.find(l => l.id === logId);
+    if (!log) return false;
+
+    if (log.action === 'FAKTUAL') {
+      toast.error('Riwayat Audit Faktual tidak dapat dihapus.');
+      return false;
+    }
+
+    let goodInc = 0;
+    let damagedInc = 0;
+
+    if (log.action === 'PURCHASE') {
+      const match = log.qty_change.match(/\+(\d+)/);
+      if (match) goodInc = -parseInt(match[1], 10);
+    } else if (log.action === 'OUTBOUND') {
+      const match = log.qty_change.match(/-(\d+)\s*\(Stok\s*(Baik|Rusak)\)/i);
+      if (match) {
+        const qty = parseInt(match[1], 10);
+        if (match[2].toLowerCase() === 'baik') goodInc = qty;
+        else damagedInc = qty;
+      }
+    } else if (log.action === 'DAMAGE') {
+      const match = log.qty_change.match(/-(\d+)\s*\(Good\)/i);
+      if (match) {
+        const qty = parseInt(match[1], 10);
+        goodInc = qty;
+        damagedInc = -qty;
+      }
+    }
+
+    const batch = writeBatch(db);
+    batch.delete(doc(db, 'logs', log.id));
+    
+    if (goodInc !== 0 || damagedInc !== 0) {
+      batch.set(doc(db, 'stock', log.itemId), {
+        qty_good: increment(goodInc),
+        qty_damaged: increment(damagedInc),
+        last_updated: new Date().toISOString()
+      }, { merge: true });
+      
+      const snapRef = getSnapshotRef(log.date);
+      batch.set(snapRef, {
+        stock_state: {
+          [log.itemId]: { 
+            qty_good: increment(goodInc), 
+            qty_damaged: increment(damagedInc)
+          }
+        }
+      }, { merge: true });
+    }
+
+    try {
+      await batch.commit();
+      toast.success('Riwayat berhasil dihapus dan stok dikembalikan.');
+      return true;
+    } catch (e) {
+      console.error(e);
+      toast.error('Gagal menghapus riwayat.');
+      return false;
+    }
+  };
+
   const seedDatabase = async () => {
     toast.loading('Menghapus data lama...', { id: 'seed' });
     const batch = writeBatch(db);
@@ -400,7 +463,7 @@ export const FirebaseDBProvider = ({ children }) => {
       catalog, stock, logs, snapshots, loading,
       saveFaktual, savePembelian, saveRusak, saveKeluar,
       getDashboardData, getFullInventory, clearData, deleteCatalogItem,
-      addCatalogItem, updateCatalogItem, seedDatabase
+      addCatalogItem, updateCatalogItem, seedDatabase, deleteLog
     }}>
       {children}
     </FirebaseDBContext.Provider>

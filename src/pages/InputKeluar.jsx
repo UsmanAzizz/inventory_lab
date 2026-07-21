@@ -4,9 +4,11 @@ import { useMockDB } from '../store/FirebaseDBContext';
 import { toTitleCase } from '../utils';
 import toast from 'react-hot-toast';
 import CustomSelect from '../components/CustomSelect';
+import { useConfirm } from '../store/ConfirmDialogContext';
 
 const InputKeluar = () => {
-  const { catalog, logs, saveKeluar } = useMockDB();
+  const { catalog, logs, saveKeluar, stock, deleteLog } = useMockDB();
+  const { confirm } = useConfirm();
   const [rows, setRows] = useState([]);
 
   // Filter Month Logic
@@ -97,9 +99,53 @@ const InputKeluar = () => {
     const validRows = rows.filter(r => r.name !== '' && r.qty_out !== '' && r.notes !== '');
     if (validRows.length === 0) return toast.error('Belum ada data valid yang siap disimpan.');
     
+    // Strict Stock Validation
+    for (const row of validRows) {
+      const match = catalog.find(c => 
+        c.name.toLowerCase() === row.name.toLowerCase() &&
+        c.brand.toLowerCase() === (row.brand || '').toLowerCase() &&
+        c.type.toLowerCase() === (row.type || '').toLowerCase()
+      );
+      
+      if (!match) {
+        return toast.error(`Barang "${row.name}" belum ada di Master Katalog!`);
+      }
+      
+      const itemStock = stock.find(s => s.itemId === match.id) || { qty_good: 0, qty_damaged: 0 };
+      const outQty = parseInt(row.qty_out, 10);
+      const availableQty = row.source === 'good' ? itemStock.qty_good : itemStock.qty_damaged;
+      
+      if (outQty > availableQty) {
+        return toast.error(`Gagal: Stok ${row.source === 'good' ? 'Baik' : 'Rusak'} untuk "${row.name}" tidak mencukupi (Sisa: ${availableQty}, Diminta: ${outQty}).`);
+      }
+    }
+    
     saveKeluar(validRows);
     toast.success('Disimpan: ' + validRows.length + ' baris transaksi');
     setRows([]);
+  };
+
+  const handleDelete = async (logId) => {
+    const isConfirmed = await confirm({
+      title: 'Hapus Riwayat',
+      message: 'Apakah Anda yakin ingin menghapus riwayat ini? Stok yang keluar akan dikembalikan.',
+      confirmText: 'Ya, Hapus',
+      cancelText: 'Batal',
+      danger: true
+    });
+    if (isConfirmed) {
+      await deleteLog(logId);
+    }
+  };
+
+  const getUniqueBrands = (name) => {
+    if (!name) return [];
+    return [...new Set(catalog.filter(c => c.name.toLowerCase() === name.toLowerCase()).map(c => c.brand))];
+  };
+
+  const getUniqueTypes = (name, brand) => {
+    if (!name || !brand) return [];
+    return [...new Set(catalog.filter(c => c.name.toLowerCase() === name.toLowerCase() && c.brand.toLowerCase() === brand.toLowerCase()).map(c => c.type))];
   };
 
   return (
@@ -135,9 +181,9 @@ const InputKeluar = () => {
               <th style={{ width: '17%' }}>Nama Barang</th>
               <th style={{ width: '11%' }}>Merek</th>
               <th style={{ width: '11%' }}>Tipe/Model</th>
-              <th style={{ width: '7%' }}>Satuan</th>
-              <th style={{ width: '8%' }}>Jumlah</th>
-              <th style={{ width: '10%' }}>Sumber</th>
+              <th style={{ width: '7%', textAlign: 'center' }}>Satuan</th>
+              <th style={{ width: '8%', textAlign: 'center' }}>Jumlah</th>
+              <th style={{ width: '10%', textAlign: 'center', whiteSpace: 'nowrap' }}>Sumber</th>
               <th style={{ width: '18%' }}>Keterangan</th>
               <th style={{ width: '6%', textAlign: 'center' }}>Aksi</th>
             </tr>
@@ -156,10 +202,16 @@ const InputKeluar = () => {
                   <input type="text" className="cell-input" list="catalog-names" value={row.name} onChange={(e) => handleChange(row.rowId, 'name', e.target.value)} />
                 </td>
                 <td>
-                  <input type="text" className="cell-input" value={row.brand} onChange={(e) => handleChange(row.rowId, 'brand', e.target.value)} />
+                  <input type="text" className="cell-input" list={`brands-${row.rowId}`} value={row.brand} onChange={(e) => handleChange(row.rowId, 'brand', e.target.value)} />
+                  <datalist id={`brands-${row.rowId}`}>
+                    {getUniqueBrands(row.name).map((b, i) => <option key={i} value={b} />)}
+                  </datalist>
                 </td>
                 <td>
-                  <input type="text" className="cell-input" value={row.type} onChange={(e) => handleChange(row.rowId, 'type', e.target.value)} />
+                  <input type="text" className="cell-input" list={`types-${row.rowId}`} value={row.type} onChange={(e) => handleChange(row.rowId, 'type', e.target.value)} />
+                  <datalist id={`types-${row.rowId}`}>
+                    {getUniqueTypes(row.name, row.brand).map((t, i) => <option key={i} value={t} />)}
+                  </datalist>
                 </td>
                 <td>
                   <input type="text" className="cell-input" value={row.unit} onChange={(e) => handleChange(row.rowId, 'unit', e.target.value)} readOnly={row.isMatched} style={{ backgroundColor: row.isMatched ? 'var(--bg-hover)' : 'transparent' }} />
@@ -208,20 +260,27 @@ const InputKeluar = () => {
                     <td className="cell-text" style={{ color: 'var(--text-secondary)' }}>
                       {log.type}
                     </td>
-                    <td className="cell-text" style={{ color: 'var(--text-secondary)' }}>
+                    <td className="cell-text" style={{ color: 'var(--text-secondary)', textAlign: 'center' }}>
                       {log.unit}
                     </td>
-                    <td className="cell-text" style={{ fontWeight: 'bold', color: '#EF4444' }}>
+                    <td className="cell-text" style={{ fontWeight: 'bold', color: '#EF4444', textAlign: 'center' }}>
                       -{String(log.qty_change).replace(/[^\d]/g, '')}
                     </td>
-                    <td className="cell-text" style={{ color: 'var(--text-secondary)' }}>
+                    <td className="cell-text" style={{ color: 'var(--text-secondary)', textAlign: 'center', whiteSpace: 'nowrap' }}>
                       {String(log.qty_change).includes('Rusak') ? 'Stok Rusak' : 'Stok Baik'}
                     </td>
                     <td className="cell-text" style={{ color: 'var(--text-secondary)' }}>
                       {log.notes}
                     </td>
                     <td className="cell-text" style={{ textAlign: 'center' }}>
-                      {/* Placeholder */}
+                      <button 
+                        className="btn-icon" 
+                        style={{ color: 'var(--text-muted)', border: 'none', background: 'none', cursor: 'pointer' }}
+                        onClick={() => handleDelete(log.id)}
+                        title="Hapus Riwayat"
+                      >
+                        <Trash2 size={16} />
+                      </button>
                     </td>
                   </tr>
                 );

@@ -102,8 +102,8 @@ const Layout = () => {
         </aside>
 
         {/* Main Content Area */}
-        <main style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-          <div className="main-content-wrapper" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', padding: '40px 48px 0 48px' }}>
+        <main style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
+          <div className="main-content-wrapper" style={{ position: 'absolute', inset: 0, overflow: 'hidden', padding: '32px 48px 0 48px', display: 'flex', flexDirection: 'column' }}>
             <Outlet />
           </div>
         </main>

@@ -182,9 +182,12 @@ h1, h2, h3, h4, h5, h6 {
 .grid-container {
   width: 100%;
   border: 1px solid var(--border-color);
-  border-radius: 4px;
-  overflow: hidden;
+  border-bottom: none;
+  border-radius: 4px 4px 0 0;
+  flex: 1;
+  overflow: auto;
   box-shadow: var(--shadow-md);
+  background-color: var(--bg-void);
 }
 
 .grid-table {
@@ -230,7 +233,7 @@ h1, h2, h3, h4, h5, h6 {
   top: 0;
   z-index: 10;
   text-align: left;
-  padding: 14px 16px;
+  padding: 14px 12px;
   color: var(--text-secondary);
   font-weight: 500;
   border-bottom: 1px solid var(--border-color);
@@ -381,7 +384,7 @@ input::-webkit-calendar-picker-indicator {
 }
 
 .grid-table td.cell-text {
-  padding: 12px 16px;
+  padding: 14px 12px;
 }
 
 /* Badges */
@@ -437,9 +440,10 @@ input::-webkit-calendar-picker-indicator {
 
 .page-content {
   flex: 1;
-  overflow-y: auto;
-  overflow-x: hidden;
-  padding-bottom: 40px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding-bottom: 0;
 }
 
 .page-title {

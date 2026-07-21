@@ -1,9 +1,11 @@
 import React from 'react';
-import { Clock } from 'lucide-react';
+import { Clock, Trash2 } from 'lucide-react';
 import { useMockDB } from '../store/FirebaseDBContext';
+import { useConfirm } from '../store/ConfirmDialogContext';
 
 const HistoryLog = () => {
-  const { logs, catalog, snapshots, loading } = useMockDB();
+  const { logs, catalog, snapshots, loading, deleteLog } = useMockDB();
+  const { confirm } = useConfirm();
 
   const getLogBadge = (type) => {
     if (type === 'PURCHASE') return <span className="badge badge-green">Masuk</span>;
@@ -34,10 +36,23 @@ const HistoryLog = () => {
 
   const formatDate = (isoString) => {
     const d = new Date(isoString);
-    return d.toLocaleString('id-ID', {
-      day: '2-digit', month: 'short', year: 'numeric',
+    return d.toLocaleDateString('id-ID', {
+      day: 'numeric', month: 'short', year: 'numeric',
       hour: '2-digit', minute: '2-digit'
     });
+  };
+
+  const handleDelete = async (logId) => {
+    const isConfirmed = await confirm({
+      title: 'Hapus Riwayat',
+      message: 'Apakah Anda yakin ingin menghapus riwayat ini? Ini akan mengembalikan stok seperti semula (kecuali Audit Faktual).',
+      confirmText: 'Ya, Hapus',
+      cancelText: 'Batal',
+      danger: true
+    });
+    if (isConfirmed) {
+      await deleteLog(logId);
+    }
   };
 
   return (
@@ -53,22 +68,23 @@ const HistoryLog = () => {
           <thead>
             <tr>
               <th style={{ width: '15%' }}>Waktu</th>
-              <th style={{ width: '10%' }}>Tipe Transaksi</th>
-              <th style={{ width: '30%' }}>Master Barang</th>
-              <th style={{ width: '20%' }}>Mutasi Fisik</th>
+              <th style={{ width: '10%', textAlign: 'center' }}>Tipe Transaksi</th>
+              <th style={{ width: '25%' }}>Master Barang</th>
+              <th style={{ width: '20%', textAlign: 'center' }}>Mutasi Fisik</th>
               <th style={{ width: '25%' }}>Keterangan</th>
+              <th style={{ width: '5%', textAlign: 'center' }}>Aksi</th>
             </tr>
           </thead>
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan="5" className="cell-text" style={{ textAlign: 'center', color: 'var(--primary-blue)', padding: '32px 0' }}>
+                <td colSpan="6" className="cell-text" style={{ textAlign: 'center', color: 'var(--primary-blue)', padding: '32px 0' }}>
                   Sedang memuat data dari pangkalan data...
                 </td>
               </tr>
             ) : logs.length === 0 ? (
               <tr>
-                <td colSpan="5" className="cell-text" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>
+                <td colSpan="6" className="cell-text" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>
                   Belum ada riwayat mutasi/transaksi tercatat.
                 </td>
               </tr>
@@ -76,12 +92,22 @@ const HistoryLog = () => {
               logs.map((log) => (
                 <tr key={log.id}>
                   <td className="cell-text" style={{ color: 'var(--text-secondary)' }}>{formatDate(log.date)}</td>
-                  <td className="cell-text">{getLogBadge(log.action)}</td>
+                  <td className="cell-text" style={{ textAlign: 'center' }}>{getLogBadge(log.action)}</td>
                   <td className="cell-text" style={{ fontWeight: '500', color: 'var(--text-primary)' }}>{getItemName(log)}</td>
-                  <td className="cell-text" style={{ fontWeight: '500' }}>
+                  <td className="cell-text" style={{ fontWeight: '500', textAlign: 'center' }}>
                     {log.qty_change}
                   </td>
                   <td className="cell-text" style={{ color: 'var(--text-secondary)' }}>{log.notes}</td>
+                  <td className="cell-text" style={{ textAlign: 'center' }}>
+                    <button 
+                      className="btn-icon" 
+                      style={{ color: 'var(--text-muted)', border: 'none', background: 'none', cursor: log.action === 'FAKTUAL' ? 'not-allowed' : 'pointer', opacity: log.action === 'FAKTUAL' ? 0.3 : 1 }}
+                      onClick={() => log.action !== 'FAKTUAL' && handleDelete(log.id)}
+                      title={log.action === 'FAKTUAL' ? "Audit Faktual tidak bisa dihapus" : "Hapus Riwayat"}
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </td>
                 </tr>
               ))
             )}

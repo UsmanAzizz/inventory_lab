@@ -4,9 +4,11 @@ import { useMockDB } from '../store/FirebaseDBContext';
 import { toTitleCase } from '../utils';
 import toast from 'react-hot-toast';
 import CustomSelect from '../components/CustomSelect';
+import { useConfirm } from '../store/ConfirmDialogContext';
 
 const InputPembelian = () => {
-  const { catalog, logs, savePembelian } = useMockDB();
+  const { catalog, logs, savePembelian, deleteLog } = useMockDB();
+  const { confirm } = useConfirm();
   const [rows, setRows] = useState([]);
 
   // Filter Month Logic
@@ -102,6 +104,19 @@ const InputPembelian = () => {
     setRows([]);
   };
 
+  const handleDelete = async (logId) => {
+    const isConfirmed = await confirm({
+      title: 'Hapus Riwayat',
+      message: 'Apakah Anda yakin ingin menghapus riwayat ini? Stok yang masuk akan dibatalkan.',
+      confirmText: 'Ya, Hapus',
+      cancelText: 'Batal',
+      danger: true
+    });
+    if (isConfirmed) {
+      await deleteLog(logId);
+    }
+  };
+
   return (
     <div className="page-container">
       <div className="topbar">
@@ -137,11 +152,11 @@ const InputPembelian = () => {
           <thead>
             <tr>
               <th style={{ width: '12%' }}>Tanggal</th>
-              <th style={{ width: '19%' }}>Nama Barang</th>
-              <th style={{ width: '12%' }}>Merek</th>
-              <th style={{ width: '12%' }}>Tipe/Model</th>
-              <th style={{ width: '8%' }}>Satuan</th>
-              <th style={{ width: '11%' }}>Jumlah</th>
+              <th style={{ width: '20%' }}>Nama Barang</th>
+              <th style={{ width: '13%' }}>Merek</th>
+              <th style={{ width: '13%' }}>Tipe/Model</th>
+              <th style={{ width: '8%', textAlign: 'center' }}>Satuan</th>
+              <th style={{ width: '8%', textAlign: 'center' }}>Jumlah</th>
               <th style={{ width: '20%' }}>Keterangan</th>
               <th style={{ width: '6%', textAlign: 'center' }}>Aksi</th>
             </tr>
@@ -249,17 +264,24 @@ const InputPembelian = () => {
                     <td className="cell-text" style={{ color: 'var(--text-secondary)' }}>
                       {log.type}
                     </td>
-                    <td className="cell-text" style={{ color: 'var(--text-secondary)' }}>
+                    <td className="cell-text" style={{ color: 'var(--text-secondary)', textAlign: 'center' }}>
                       {log.unit}
                     </td>
-                    <td className="cell-text" style={{ fontWeight: 'bold', color: '#10B981' }}>
+                    <td className="cell-text" style={{ fontWeight: 'bold', color: '#10B981', textAlign: 'center' }}>
                       +{String(log.qty_change).replace(/[^\d]/g, '')}
                     </td>
                     <td className="cell-text" style={{ color: 'var(--text-secondary)' }}>
                       {log.notes}
                     </td>
                     <td className="cell-text" style={{ textAlign: 'center' }}>
-                      {/* Placeholder for history action if needed */}
+                      <button 
+                        className="btn-icon" 
+                        style={{ color: 'var(--text-muted)', border: 'none', background: 'none', cursor: 'pointer' }}
+                        onClick={() => handleDelete(log.id)}
+                        title="Hapus Riwayat"
+                      >
+                        <Trash2 size={16} />
+                      </button>
                     </td>
                   </tr>
                 );

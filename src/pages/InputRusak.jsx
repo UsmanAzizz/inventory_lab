@@ -5,9 +5,11 @@ import { useMockDB } from '../store/FirebaseDBContext';
 import { toTitleCase } from '../utils';
 import toast from 'react-hot-toast';
 import CustomSelect from '../components/CustomSelect';
+import { useConfirm } from '../store/ConfirmDialogContext';
 
 const InputRusak = () => {
-  const { catalog, logs, saveRusak } = useMockDB();
+  const { catalog, logs, saveRusak, stock, deleteLog } = useMockDB();
+  const { confirm } = useConfirm();
   const [rows, setRows] = useState([]);
 
   // Filter Month Logic
@@ -101,10 +103,44 @@ const InputRusak = () => {
     const validRows = rows.filter(r => r.name !== '' && r.qty_out !== '');
     if (validRows.length === 0) return toast.error('Belum ada data kerusakan/keluar yang valid.');
     
+    // Strict Stock Validation for Damaged Items
+    for (const row of validRows) {
+      const match = catalog.find(c => 
+        c.name.toLowerCase() === row.name.toLowerCase() &&
+        c.brand.toLowerCase() === (row.brand || '').toLowerCase() &&
+        c.type.toLowerCase() === (row.type || '').toLowerCase()
+      );
+      
+      if (!match) {
+        return toast.error(`Barang "${row.name}" belum ada di Master Katalog!`);
+      }
+      
+      const itemStock = stock.find(s => s.itemId === match.id) || { qty_good: 0, qty_damaged: 0 };
+      const outQty = parseInt(row.qty_out, 10);
+      const availableQty = itemStock.qty_good;
+      
+      if (outQty > availableQty) {
+        return toast.error(`Gagal: Stok Baik untuk "${row.name}" tidak mencukupi (Sisa: ${availableQty}, Diminta: ${outQty}).`);
+      }
+    }
+    
     saveRusak(validRows);
     
     toast.success('Disimpan: ' + validRows.length + ' baris transaksi');
     setRows([]);
+  };
+
+  const handleDelete = async (logId) => {
+    const isConfirmed = await confirm({
+      title: 'Hapus Riwayat',
+      message: 'Apakah Anda yakin ingin menghapus riwayat ini? Stok rusak akan dibatalkan dan dikembalikan ke stok baik.',
+      confirmText: 'Ya, Hapus',
+      cancelText: 'Batal',
+      danger: true
+    });
+    if (isConfirmed) {
+      await deleteLog(logId);
+    }
   };
 
   return (
@@ -139,8 +175,8 @@ const InputRusak = () => {
               <th style={{ width: '17%' }}>Nama Barang</th>
               <th style={{ width: '13%' }}>Merek</th>
               <th style={{ width: '13%' }}>Tipe/Model</th>
-              <th style={{ width: '8%' }}>Satuan</th>
-              <th style={{ width: '10%', color: '#EF4444' }}>Jumlah</th>
+              <th style={{ width: '8%', textAlign: 'center' }}>Satuan</th>
+              <th style={{ width: '10%', color: '#EF4444', textAlign: 'center' }}>Jumlah</th>
               <th style={{ width: '21%' }}>Keterangan</th>
               <th style={{ width: '6%', textAlign: 'center' }}>Aksi</th>
             </tr>
@@ -248,11 +284,18 @@ const InputRusak = () => {
                     <td className="cell-text" style={{ fontWeight: '500' }}>{log.name}</td>
                     <td className="cell-text">{log.brand}</td>
                     <td className="cell-text">{log.type}</td>
-                    <td className="cell-text">{log.unit}</td>
-                    <td className="cell-text" style={{ color: '#EF4444', fontWeight: 'bold' }}>{Math.abs(qty)}</td>
+                    <td className="cell-text" style={{ textAlign: 'center' }}>{log.unit}</td>
+                    <td className="cell-text" style={{ color: '#EF4444', fontWeight: 'bold', textAlign: 'center' }}>{Math.abs(qty)}</td>
                     <td className="cell-text" style={{ color: 'var(--text-secondary)' }}>{log.notes}</td>
                     <td style={{ textAlign: 'center', verticalAlign: 'middle' }}>
-                      <FileText size={16} color="var(--border-color)" />
+                      <button 
+                        className="btn-icon" 
+                        style={{ color: 'var(--text-muted)', border: 'none', background: 'none', cursor: 'pointer' }}
+                        onClick={() => handleDelete(log.id)}
+                        title="Hapus Riwayat"
+                      >
+                        <Trash2 size={16} />
+                      </button>
                     </td>
                   </tr>
                 );

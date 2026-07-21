@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { CheckSquare, Plus, Trash2 } from 'lucide-react';
 
 import { useMockDB } from '../store/FirebaseDBContext';
@@ -7,7 +7,24 @@ import toast from 'react-hot-toast';
 
 const InputFaktual = () => {
   const { catalog, saveFaktual, getFullInventory } = useMockDB();
-  const [rows, setRows] = useState([]); // Mulai dengan kosong sesuai instruksi
+  const [rows, setRows] = useState([]);
+
+  useEffect(() => {
+    const inventory = getFullInventory();
+    if (inventory.length > 0) {
+      const newRows = inventory.map(item => ({
+        rowId: Date.now() + Math.random(),
+        name: item.name,
+        brand: item.brand,
+        type: item.type,
+        unit: item.unit,
+        qty_good: item.qty_good,
+        qty_damaged: item.qty_damaged,
+        isMatched: true
+      }));
+      setRows(newRows);
+    }
+  }, []); // Run once on mount
 
   // Datalist options
   const uniqueNames = [...new Set(catalog.map(c => c.name))].filter(Boolean);
@@ -100,9 +117,7 @@ const InputFaktual = () => {
         </div>
         
         <div style={{ display: 'flex', gap: '12px' }}>
-          <button className="btn btn-outline" onClick={loadLatestData}>
-            Muat Data Terakhir
-          </button>
+
           <button className="btn btn-outline" onClick={addRow}>
             <Plus size={16} /> Tambah Baris Transaksi
           </button>
@@ -128,9 +143,9 @@ const InputFaktual = () => {
                 <th style={{ width: '15%' }}>Nama Barang</th>
                 <th style={{ width: '15%' }}>Merek</th>
                 <th style={{ width: '15%' }}>Tipe/Model</th>
-                <th style={{ width: '10%' }}>Satuan</th>
-                <th style={{ width: '12%', color: '#10B981' }}>Jml. Baik</th>
-                <th style={{ width: '12%', color: '#EF4444' }}>Jml. Rusak</th>
+                <th style={{ width: '10%', textAlign: 'center' }}>Satuan</th>
+                <th style={{ width: '12%', color: '#10B981', textAlign: 'center' }}>Jml. Baik</th>
+                <th style={{ width: '12%', color: '#EF4444', textAlign: 'center' }}>Jml. Rusak</th>
                 <th style={{ width: '15%', textAlign: 'center' }}>Total</th>
                 <th style={{ width: '6%', textAlign: 'center' }}>Aksi</th>
               </tr>
@@ -183,7 +198,7 @@ const InputFaktual = () => {
                         value={row.unit}
                         disabled={row.isMatched}
                         onChange={(e) => handleChange(row.rowId, 'unit', e.target.value)}
-                        style={{ color: row.isMatched ? 'var(--text-muted)' : 'var(--text-primary)' }}
+                        style={{ textAlign: 'center', color: row.isMatched ? 'var(--text-muted)' : 'var(--text-primary)' }}
                       />
                     </td>
                     <td>
@@ -191,6 +206,7 @@ const InputFaktual = () => {
                         type="number" 
                         min="0"
                         className="cell-input" 
+                        style={{ textAlign: 'center' }}
                         value={row.qty_good}
                         onChange={(e) => handleChange(row.rowId, 'qty_good', e.target.value)}
                       />
@@ -200,6 +216,7 @@ const InputFaktual = () => {
                         type="number" 
                         min="0"
                         className="cell-input" 
+                        style={{ textAlign: 'center' }}
                         value={row.qty_damaged}
                         onChange={(e) => handleChange(row.rowId, 'qty_damaged', e.target.value)}
                       />

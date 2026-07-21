@@ -187,7 +187,7 @@ const Laporan = () => {
             Belum ada rekaman laporan untuk tahun ini.
           </div>
         ) : (
-          <div className="grid-container" style={{ overflowX: 'auto', backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)' }}>
+          <div className="grid-container" style={{ overflowX: 'auto', backgroundColor: 'var(--bg-void)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)' }}>
             <table className="grid-table" style={{ minWidth: '600px', width: '100%', fontSize: '13px' }}>
               <thead>
                 <tr>
