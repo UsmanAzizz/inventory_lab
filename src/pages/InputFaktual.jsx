@@ -91,8 +91,8 @@ const InputFaktual = () => {
   };
 
   return (
-    <div>
-      <div className="topbar" style={{ height: '54px' }}>
+    <div className="page-container">
+      <div className="topbar">
         <div style={{ display: 'flex', alignItems: 'center', height: '38px' }}>
           <h2 className="page-title">
             <CheckSquare size={20} color="var(--primary-blue)" /> Audit Faktual (Master Data)
@@ -109,6 +109,8 @@ const InputFaktual = () => {
           <button className="btn btn-primary" onClick={handleSave}>Simpan</button>
         </div>
       </div>
+
+      <div className="page-content">
 
       <datalist id="catalog-names">
         {uniqueNames.map((n, i) => <option key={i} value={n} />)}
@@ -222,6 +224,7 @@ const InputFaktual = () => {
           </table>
         </div>
       )}
+      </div>
     </div>
   );
 };

@@ -103,14 +103,15 @@ const InputKeluar = () => {
   };
 
   return (
-    <div>
-      <div className="topbar" style={{ height: '54px' }}>
+    <div className="page-container">
+      <div className="topbar">
         <div style={{ display: 'flex', alignItems: 'center', height: '38px' }}>
           <h2 className="page-title">
             <PackageMinus size={20} color="#F59E0B" /> Catat Barang Keluar
           </h2>
         </div>
-        <div style={{ display: 'flex', gap: '12px' }}>
+        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+          <CustomSelect value={filterMonth} onChange={setFilterMonth} options={monthOptions} width="160px" />
           <button className="btn btn-outline" onClick={addRow}>
             <Plus size={16} /> Tambah Baris Transaksi
           </button>
@@ -118,97 +119,74 @@ const InputKeluar = () => {
         </div>
       </div>
 
+      <div className="page-content">
+
       <datalist id="catalog-names">
         {uniqueNames.map((n, i) => <option key={i} value={n} />)}
       </datalist>
 
-      {/* Area Form Input */}
-      {rows.length > 0 && (
-        <div className="grid-container" style={{ overflowX: 'auto', marginBottom: '32px' }}>
-          <div style={{ padding: '12px 16px', backgroundColor: 'var(--bg-hover)', borderBottom: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <FileText size={16} color="var(--primary-blue)" />
-            <span style={{ fontSize: '13px', fontWeight: '500', color: 'var(--text-primary)' }}>Form Input Transaksi Baru</span>
-          </div>
-          <table className="grid-table" style={{ minWidth: '900px' }}>
-            <thead>
-              <tr>
-                <th style={{ width: '20%' }}>Nama Barang</th>
-                <th style={{ width: '15%' }}>Merek</th>
-                <th style={{ width: '15%' }}>Tipe/Model</th>
-                <th style={{ width: '10%' }}>Satuan</th>
-                <th style={{ width: '10%', color: '#F59E0B' }}>- Jumlah Keluar</th>
-                <th style={{ width: '10%' }}>Sumber Stok</th>
-                <th style={{ width: '15%' }}>Peminjam / Keterangan</th>
-                <th style={{ width: '5%', textAlign: 'center' }}>Aksi</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((row) => (
-                <tr key={row.rowId}>
-                  <td>
-                    <input type="text" className="cell-input" list="catalog-names" value={row.name} onChange={(e) => handleChange(row.rowId, 'name', e.target.value)} />
-                  </td>
-                  <td>
-                    <input type="text" className="cell-input" value={row.brand} onChange={(e) => handleChange(row.rowId, 'brand', e.target.value)} />
-                  </td>
-                  <td>
-                    <input type="text" className="cell-input" value={row.type} onChange={(e) => handleChange(row.rowId, 'type', e.target.value)} />
-                  </td>
-                  <td>
-                    <input type="text" className="cell-input" value={row.unit} onChange={(e) => handleChange(row.rowId, 'unit', e.target.value)} readOnly={row.isMatched} style={{ backgroundColor: row.isMatched ? 'var(--bg-hover)' : 'transparent' }} />
-                  </td>
-                  <td>
-                    <input type="number" className="cell-input" style={{ color: '#F59E0B', fontWeight: 'bold' }} value={row.qty_out} onChange={(e) => handleChange(row.rowId, 'qty_out', e.target.value)} min="1" />
-                  </td>
-                  <td>
-                    <select className="cell-input" value={row.source} onChange={(e) => handleChange(row.rowId, 'source', e.target.value)}>
-                      <option value="good">Stok Baik</option>
-                      <option value="damaged">Stok Rusak</option>
-                    </select>
-                  </td>
-                  <td>
-                    <input type="text" className="cell-input" value={row.notes} onChange={(e) => handleChange(row.rowId, 'notes', e.target.value)} placeholder="Contoh: Dipinjam Kelas 12A" />
-                  </td>
-                  <td style={{ textAlign: 'center' }}>
-                    <button className="btn btn-outline" onClick={() => removeRow(row.rowId)} style={{ padding: '6px', color: '#EF4444' }}>
-                      <Trash2 size={14} />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          <div style={{ padding: '12px 16px', display: 'flex', justifyContent: 'flex-end', backgroundColor: 'var(--bg-hover)', borderTop: '1px solid var(--border-color)' }}>
-             <button className="btn btn-primary" onClick={handleSave}>Simpan Semua</button>
-          </div>
-        </div>
-      )}
-
-      {/* Area Tabel Riwayat */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', marginTop: rows.length > 0 ? '0' : '24px' }}>
-        <h3 style={{ fontSize: '15px', fontWeight: '600', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <Calendar size={18} color="var(--text-muted)" /> Riwayat Barang Keluar / Dipakai
-        </h3>
-        <div>
-          <CustomSelect value={filterMonth} onChange={setFilterMonth} options={monthOptions} width="180px" />
-        </div>
-      </div>
+      {/* Area Tabel Riwayat dan Input */}
 
       <div className="grid-container" style={{ overflowX: 'auto' }}>
-        <table className="grid-table" style={{ minWidth: '800px', width: '100%', fontSize: '13px' }}>
+        <table className="grid-table" style={{ minWidth: '700px', width: '100%', fontSize: '13px' }}>
           <thead>
             <tr>
-              <th style={{ width: '15%' }}>Tanggal</th>
-              <th style={{ width: '25%' }}>Nama Barang</th>
-              <th style={{ width: '15%' }}>Merek & Tipe</th>
-              <th style={{ width: '15%' }}>Jumlah Keluar</th>
-              <th style={{ width: '30%' }}>Keterangan</th>
+              <th style={{ width: '12%' }}>Tanggal</th>
+              <th style={{ width: '17%' }}>Nama Barang</th>
+              <th style={{ width: '11%' }}>Merek</th>
+              <th style={{ width: '11%' }}>Tipe/Model</th>
+              <th style={{ width: '7%' }}>Satuan</th>
+              <th style={{ width: '8%' }}>Jumlah</th>
+              <th style={{ width: '10%' }}>Sumber</th>
+              <th style={{ width: '18%' }}>Keterangan</th>
+              <th style={{ width: '6%', textAlign: 'center' }}>Aksi</th>
             </tr>
           </thead>
           <tbody>
-            {filteredLogs.length === 0 ? (
+            {rows.map((row) => (
+              <tr key={row.rowId} style={{ backgroundColor: 'rgba(245, 158, 11, 0.05)' }}>
+                <td className="cell-text" style={{ verticalAlign: 'middle', position: 'relative', color: 'var(--text-secondary)' }}>
+                  {new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}<br/>
+                  <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}</span>
+                  <span style={{ position: 'absolute', bottom: '4px', right: '4px', display: 'inline-block', padding: '2px 6px', backgroundColor: 'rgba(245, 158, 11, 0.1)', color: '#F59E0B', borderRadius: '4px', fontSize: '9px', fontWeight: '600' }}>
+                    Entri Baru
+                  </span>
+                </td>
+                <td>
+                  <input type="text" className="cell-input" list="catalog-names" value={row.name} onChange={(e) => handleChange(row.rowId, 'name', e.target.value)} />
+                </td>
+                <td>
+                  <input type="text" className="cell-input" value={row.brand} onChange={(e) => handleChange(row.rowId, 'brand', e.target.value)} />
+                </td>
+                <td>
+                  <input type="text" className="cell-input" value={row.type} onChange={(e) => handleChange(row.rowId, 'type', e.target.value)} />
+                </td>
+                <td>
+                  <input type="text" className="cell-input" value={row.unit} onChange={(e) => handleChange(row.rowId, 'unit', e.target.value)} readOnly={row.isMatched} style={{ backgroundColor: row.isMatched ? 'var(--bg-hover)' : 'transparent' }} />
+                </td>
+                <td>
+                  <input type="number" className="cell-input" style={{ color: '#F59E0B', fontWeight: 'bold' }} value={row.qty_out} onChange={(e) => handleChange(row.rowId, 'qty_out', e.target.value)} min="1" />
+                </td>
+                <td>
+                  <select className="cell-input" style={{ width: '100%' }} value={row.source} onChange={(e) => handleChange(row.rowId, 'source', e.target.value)}>
+                    <option value="good">Stok Baik</option>
+                    <option value="damaged">Stok Rusak</option>
+                  </select>
+                </td>
+                <td>
+                  <input type="text" className="cell-input" value={row.notes} onChange={(e) => handleChange(row.rowId, 'notes', e.target.value)} />
+                </td>
+                <td style={{ textAlign: 'center', verticalAlign: 'middle' }}>
+                  <button onClick={() => removeRow(row.rowId)} style={{ padding: '6px', color: '#EF4444', background: 'none', border: 'none', cursor: 'pointer' }}>
+                    <Trash2 size={16} />
+                  </button>
+                </td>
+              </tr>
+            ))}
+
+            {filteredLogs.length === 0 && rows.length === 0 ? (
               <tr>
-                <td colSpan="5" style={{ padding: '32px', textAlign: 'center', color: 'var(--text-muted)' }}>
+                <td colSpan="9" style={{ padding: '32px', textAlign: 'center', color: 'var(--text-muted)' }}>
                   Tidak ada riwayat barang keluar pada periode ini.
                 </td>
               </tr>
@@ -225,13 +203,25 @@ const InputKeluar = () => {
                       {log.name}
                     </td>
                     <td className="cell-text" style={{ color: 'var(--text-secondary)' }}>
-                      {log.brand} {log.type}
+                      {log.brand}
+                    </td>
+                    <td className="cell-text" style={{ color: 'var(--text-secondary)' }}>
+                      {log.type}
+                    </td>
+                    <td className="cell-text" style={{ color: 'var(--text-secondary)' }}>
+                      {log.unit}
                     </td>
                     <td className="cell-text" style={{ fontWeight: 'bold', color: '#EF4444' }}>
-                      {log.qty_change} {log.unit}
+                      -{String(log.qty_change).replace(/[^\d]/g, '')}
+                    </td>
+                    <td className="cell-text" style={{ color: 'var(--text-secondary)' }}>
+                      {String(log.qty_change).includes('Rusak') ? 'Stok Rusak' : 'Stok Baik'}
                     </td>
                     <td className="cell-text" style={{ color: 'var(--text-secondary)' }}>
                       {log.notes}
+                    </td>
+                    <td className="cell-text" style={{ textAlign: 'center' }}>
+                      {/* Placeholder */}
                     </td>
                   </tr>
                 );
@@ -239,6 +229,8 @@ const InputKeluar = () => {
             )}
           </tbody>
         </table>
+      </div>
+
       </div>
     </div>
   );

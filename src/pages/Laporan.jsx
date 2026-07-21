@@ -69,30 +69,36 @@ const Laporan = () => {
     latestSnapshotInMonth = snapshots.find(s => s.timestamp <= endOfMonth);
     
     if (latestSnapshotInMonth) {
-       faktualInventory = getFullInventory(latestSnapshotInMonth.stock_state, latestSnapshotInMonth.catalog_state);
+       const snapStock = Array.isArray(latestSnapshotInMonth.stock_state) ? latestSnapshotInMonth.stock_state : Object.values(latestSnapshotInMonth.stock_state || {});
+       const snapCatalog = Array.isArray(latestSnapshotInMonth.catalog_state) ? latestSnapshotInMonth.catalog_state : Object.values(latestSnapshotInMonth.catalog_state || {});
+       faktualInventory = getFullInventory(snapStock, snapCatalog);
     }
 
     const monthLogs = logs.filter(l => l.date.startsWith(selectedMonth));
     
     const aggregateLogs = (logArray) => {
         const agg = {};
+        const logSnapshots = {};
         logArray.forEach(l => {
            if (!agg[l.itemId]) agg[l.itemId] = 0;
            const match = l.qty_change.match(/[-+]?(\d+)/);
            const qty = match ? parseInt(match[1]) : 0;
            agg[l.itemId] += Math.abs(qty);
+           if (l.itemSnapshot) logSnapshots[l.itemId] = l.itemSnapshot;
         });
         
         return Object.keys(agg).map(itemId => {
-           const item = catalog.find(c => c.id === itemId) || 
-                        (latestSnapshotInMonth ? latestSnapshotInMonth.catalog_state.find(c => c.id === itemId) : null) || 
+           const snapCatalog = latestSnapshotInMonth ? (Array.isArray(latestSnapshotInMonth.catalog_state) ? latestSnapshotInMonth.catalog_state : Object.values(latestSnapshotInMonth.catalog_state || {})) : [];
+           const item = logSnapshots[itemId] ||
+                        catalog.find(c => c.id === itemId) || 
+                        snapCatalog.find(c => c.id === itemId) || 
                         { name: 'Unknown', brand: '-', type: '-', unit: '-' };
            return { ...item, qty_total: agg[itemId] };
         }).sort((a,b) => a.name.localeCompare(b.name));
     };
 
     masukData = aggregateLogs(monthLogs.filter(l => l.action === 'PURCHASE'));
-    keluarData = aggregateLogs(monthLogs.filter(l => l.action === 'USAGE'));
+    keluarData = aggregateLogs(monthLogs.filter(l => l.action === 'OUTBOUND'));
     rusakData = aggregateLogs(monthLogs.filter(l => l.action === 'DAMAGE'));
   }
 
@@ -102,7 +108,6 @@ const Laporan = () => {
       <div>
         <h1 style={{ margin: '0 0 4px 0', fontSize: '24px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>MGMP TJKT SMK DIPONEGORO CIPARI</h1>
         <p style={{ margin: 0, fontSize: '14px', fontWeight: 'bold' }}>{title}</p>
-        <p style={{ margin: 0, fontSize: '14px' }}>Bulan: {formatMonthLabel(selectedMonth)}</p>
       </div>
     </div>
   );
@@ -116,17 +121,50 @@ const Laporan = () => {
     </div>
   );
 
+  const formatDateOnly = (isoString) => {
+    const d = new Date(isoString);
+    return d.toLocaleDateString('id-ID', {
+      day: '2-digit', month: 'long', year: 'numeric'
+    });
+  };
+
+  const renderInfoTable = (jenisLaporan, keterangan) => (
+    <table style={{ width: '100%', marginBottom: '20px', fontSize: '12px', borderCollapse: 'collapse' }}>
+      <tbody>
+        <tr>
+          <td style={{ width: '120px', padding: '4px 0', fontWeight: 'bold' }}>Jenis Laporan</td>
+          <td style={{ width: '10px', padding: '4px 0' }}>:</td>
+          <td style={{ padding: '4px 0' }}>{jenisLaporan}</td>
+        </tr>
+        <tr>
+          <td style={{ padding: '4px 0', fontWeight: 'bold' }}>Keterangan</td>
+          <td style={{ padding: '4px 0' }}>:</td>
+          <td style={{ padding: '4px 0' }}>{keterangan}</td>
+        </tr>
+        <tr>
+          <td style={{ padding: '4px 0', fontWeight: 'bold' }}>Bulan / Tahun</td>
+          <td style={{ padding: '4px 0' }}>:</td>
+          <td style={{ padding: '4px 0' }}>{formatMonthLabel(selectedMonth)}</td>
+        </tr>
+        <tr>
+          <td style={{ padding: '4px 0', fontWeight: 'bold' }}>Tanggal Cetak</td>
+          <td style={{ padding: '4px 0' }}>:</td>
+          <td style={{ padding: '4px 0' }}>{formatDateOnly(new Date().toISOString())}</td>
+        </tr>
+      </tbody>
+    </table>
+  );
+
   return (
-    <div>
-      <div className="no-print">
-        <div className="topbar" style={{ height: '54px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', height: '38px' }}>
-            <h2 className="page-title">
-              <Printer size={20} color="var(--primary-blue)" /> Laporan Bulanan
-            </h2>
-          </div>
-          
-          <div style={{ display: 'flex', gap: '12px' }}>
+    <div className="page-container">
+      <div className="no-print topbar">
+        <div style={{ display: 'flex', alignItems: 'center', height: '38px' }}>
+          <h2 className="page-title">
+            <Printer size={20} color="var(--primary-blue)" /> Laporan Bulanan
+          </h2>
+        </div>
+        
+        <div style={{ display: 'flex', gap: '12px' }}>
             <select 
               value={filterYear}
               onChange={(e) => setFilterYear(e.target.value)}
@@ -139,7 +177,7 @@ const Laporan = () => {
             </select>
           </div>
         </div>
-
+      <div className="page-content">
         {loading ? (
           <div style={{ padding: '40px', textAlign: 'center', color: 'var(--primary-blue)', border: '1px dashed var(--border-color)', borderRadius: 'var(--radius-sm)' }}>
             Sedang memuat data laporan...
@@ -212,10 +250,7 @@ const Laporan = () => {
               {/* HALAMAN 1: AUDIT FAKTUAL */}
               <div>
                 {renderKopSurat('Laporan Audit Faktual Inventaris')}
-                <div style={{ marginBottom: '16px', fontSize: '12px' }}>
-                  <p style={{ margin: '0 0 4px 0' }}><strong>Deskripsi:</strong> Laporan rekapitulasi seluruh stok barang per tanggal {latestSnapshotInMonth ? formatDate(latestSnapshotInMonth.timestamp) : '-'}.</p>
-                  <p style={{ margin: 0 }}><strong>Dicetak Pada:</strong> {formatDate(new Date().toISOString())}</p>
-                </div>
+                {renderInfoTable('Rekapitulasi Inventaris', `Kondisi akhir stok inventaris laboratorium TJKT per tanggal ${latestSnapshotInMonth ? formatDateOnly(latestSnapshotInMonth.timestamp) : '-'}.`)}
                 <table className="pdf-table" style={{ width: '100%', fontSize: '11px', borderCollapse: 'collapse', marginBottom: '30px' }}>
                   <thead>
                     <tr style={{ backgroundColor: '#f0f0f0' }}>
@@ -246,9 +281,7 @@ const Laporan = () => {
               {/* HALAMAN 2: BARANG MASUK */}
               <div style={{ pageBreakBefore: 'always', paddingTop: '20px' }}>
                 {renderKopSurat('Laporan Rekapitulasi Barang Masuk')}
-                <div style={{ marginBottom: '16px', fontSize: '12px' }}>
-                  <p style={{ margin: '0 0 4px 0' }}><strong>Deskripsi:</strong> Akumulasi seluruh barang masuk (pengadaan) pada bulan ini.</p>
-                </div>
+                {renderInfoTable('Rekapitulasi Barang Masuk', `Akumulasi seluruh barang masuk (pengadaan) per tanggal ${latestSnapshotInMonth ? formatDateOnly(latestSnapshotInMonth.timestamp) : '-'}.`)}
                 <table className="pdf-table" style={{ width: '100%', fontSize: '11px', borderCollapse: 'collapse', marginBottom: '30px' }}>
                   <thead>
                     <tr style={{ backgroundColor: '#f0f0f0' }}>
@@ -277,9 +310,7 @@ const Laporan = () => {
               {/* HALAMAN 3: BARANG KELUAR */}
               <div style={{ pageBreakBefore: 'always', paddingTop: '20px' }}>
                 {renderKopSurat('Laporan Rekapitulasi Barang Keluar')}
-                <div style={{ marginBottom: '16px', fontSize: '12px' }}>
-                  <p style={{ margin: '0 0 4px 0' }}><strong>Deskripsi:</strong> Akumulasi seluruh barang keluar (terpakai/dipinjam) pada bulan ini.</p>
-                </div>
+                {renderInfoTable('Rekapitulasi Barang Keluar', `Akumulasi seluruh barang keluar per tanggal ${latestSnapshotInMonth ? formatDateOnly(latestSnapshotInMonth.timestamp) : '-'}.`)}
                 <table className="pdf-table" style={{ width: '100%', fontSize: '11px', borderCollapse: 'collapse', marginBottom: '30px' }}>
                   <thead>
                     <tr style={{ backgroundColor: '#f0f0f0' }}>
@@ -308,9 +339,7 @@ const Laporan = () => {
               {/* HALAMAN 4: BARANG RUSAK */}
               <div style={{ pageBreakBefore: 'always', paddingTop: '20px' }}>
                 {renderKopSurat('Laporan Rekapitulasi Barang Rusak')}
-                <div style={{ marginBottom: '16px', fontSize: '12px' }}>
-                  <p style={{ margin: '0 0 4px 0' }}><strong>Deskripsi:</strong> Akumulasi seluruh barang yang dilaporkan rusak pada bulan ini.</p>
-                </div>
+                {renderInfoTable('Rekapitulasi Barang Rusak', `Akumulasi seluruh barang yang dilaporkan rusak per tanggal ${latestSnapshotInMonth ? formatDateOnly(latestSnapshotInMonth.timestamp) : '-'}.`)}
                 <table className="pdf-table" style={{ width: '100%', fontSize: '11px', borderCollapse: 'collapse', marginBottom: '30px' }}>
                   <thead>
                     <tr style={{ backgroundColor: '#f0f0f0' }}>

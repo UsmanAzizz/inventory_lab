@@ -13,9 +13,10 @@ const KatalogBarang = () => {
   const [isAdding, setIsAdding] = useState(false);
   const [addForm, setAddForm] = useState({ name: '', brand: '', type: '', unit: 'Unit' });
 
-  const uniqueNames = [...new Set(catalog.map(c => c.name))].filter(Boolean);
-  const uniqueBrands = [...new Set(catalog.map(c => c.brand))].filter(Boolean);
-  const uniqueTypes = [...new Set(catalog.map(c => c.type))].filter(Boolean);
+  const activeCatalog = catalog.filter(c => !c.is_deleted);
+  const uniqueNames = [...new Set(activeCatalog.map(c => c.name))].filter(Boolean);
+  const uniqueBrands = [...new Set(activeCatalog.map(c => c.brand))].filter(Boolean);
+  const uniqueTypes = [...new Set(activeCatalog.map(c => c.type))].filter(Boolean);
 
   const startEdit = (item) => {
     setEditId(item.id);
@@ -54,29 +55,33 @@ const KatalogBarang = () => {
   };
 
   return (
-    <div>
-      <div className="topbar" style={{ height: '54px' }}>
+    <div className="page-container">
+      <div className="topbar">
         <h2 className="page-title">
           <Box size={20} color="var(--primary-blue)" /> Katalog Master Barang
         </h2>
-        <button 
-          className="btn btn-outline" 
-          onClick={() => setIsAdding(true)}
-          disabled={isAdding}
-        >
-          <Plus size={16} /> Tambah Barang
-        </button>
+        <div style={{ display: 'flex', gap: '12px' }}>
+          <button 
+            className="btn btn-outline" 
+            onClick={() => setIsAdding(true)}
+            disabled={isAdding}
+          >
+            <Plus size={16} /> Tambah Barang
+          </button>
+          {isAdding && <button className="btn btn-primary" onClick={saveAdd}>Simpan</button>}
+        </div>
       </div>
 
-      <div className="grid-container" style={{ overflowX: 'auto', marginTop: '24px' }}>
+      <div className="page-content">
+        <div className="grid-container" style={{ overflowX: 'auto', marginTop: '24px' }}>
         <table className="grid-table" style={{ minWidth: '800px' }}>
           <thead>
             <tr>
               <th className="col-name">Nama Barang</th>
-              <th className="col-brand-kat">Merek</th>
-              <th className="col-model-kat">Tipe/Model</th>
-              <th className="col-unit-kat">Satuan</th>
-              <th className="col-action">Aksi</th>
+              <th className="col-brand-kat" style={{ textAlign: 'center' }}>Merek</th>
+              <th className="col-model-kat" style={{ textAlign: 'center' }}>Tipe/Model</th>
+              <th className="col-unit-kat" style={{ textAlign: 'center' }}>Satuan</th>
+              <th className="col-action" style={{ textAlign: 'center' }}>Aksi</th>
             </tr>
           </thead>
           <tbody>
@@ -88,28 +93,25 @@ const KatalogBarang = () => {
                   </datalist>
                   <input className="cell-input" autoFocus list="catalog-names" placeholder="Nama barang..." value={addForm.name} onChange={e => setAddForm({...addForm, name: toTitleCase(e.target.value)})} />
                 </td>
-                <td>
+                <td style={{ textAlign: 'center' }}>
                   <datalist id="add-brands">
-                    {(addForm.name ? [...new Set(catalog.filter(c => c.name.toLowerCase() === addForm.name.toLowerCase() && c.brand).map(c => c.brand))] : uniqueBrands).map((b, i) => <option key={i} value={b} />)}
+                    {(addForm.name ? [...new Set(activeCatalog.filter(c => c.name.toLowerCase() === addForm.name.toLowerCase() && c.brand).map(c => c.brand))] : uniqueBrands).map((b, i) => <option key={i} value={b} />)}
                   </datalist>
-                  <input className="cell-input" list="add-brands" placeholder="Merek..." value={addForm.brand} onChange={e => setAddForm({...addForm, brand: toTitleCase(e.target.value)})} />
+                  <input className="cell-input" style={{ textAlign: 'center' }} list="add-brands" placeholder="Merek..." value={addForm.brand} onChange={e => setAddForm({...addForm, brand: toTitleCase(e.target.value)})} />
                 </td>
-                <td>
+                <td style={{ textAlign: 'center' }}>
                   <datalist id="add-types">
-                    {(addForm.name ? [...new Set(catalog.filter(c => c.name.toLowerCase() === addForm.name.toLowerCase() && c.brand).map(c => c.type))] : uniqueTypes).map((t, i) => <option key={i} value={t} />)}
+                    {(addForm.name ? [...new Set(activeCatalog.filter(c => c.name.toLowerCase() === addForm.name.toLowerCase() && c.brand).map(c => c.type))] : uniqueTypes).map((t, i) => <option key={i} value={t} />)}
                   </datalist>
-                  <input className="cell-input" list="add-types" placeholder="Tipe/Model..." value={addForm.type} onChange={e => setAddForm({...addForm, type: toTitleCase(e.target.value)})} />
+                  <input className="cell-input" style={{ textAlign: 'center' }} list="add-types" placeholder="Tipe/Model..." value={addForm.type} onChange={e => setAddForm({...addForm, type: toTitleCase(e.target.value)})} />
                 </td>
-                <td>
-                  <input className="cell-input" placeholder="Satuan..." value={addForm.unit} onChange={e => setAddForm({...addForm, unit: toTitleCase(e.target.value)})} />
+                <td style={{ textAlign: 'center' }}>
+                  <input className="cell-input" style={{ textAlign: 'center' }} placeholder="Satuan..." value={addForm.unit} onChange={e => setAddForm({...addForm, unit: toTitleCase(e.target.value)})} />
                 </td>
                 <td style={{ textAlign: 'center', verticalAlign: 'middle' }}>
                   <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
-                    <button onClick={saveAdd} style={{ background: 'none', border: 'none', color: '#10B981', cursor: 'pointer' }} title="Simpan">
-                      <Check size={18} />
-                    </button>
-                    <button onClick={cancelAdd} style={{ background: 'none', border: 'none', color: '#EF4444', cursor: 'pointer' }} title="Batal">
-                      <X size={18} />
+                    <button onClick={cancelAdd} style={{ background: 'none', border: 'none', color: '#EF4444', cursor: 'pointer' }} title="Hapus Entri">
+                      <Trash2 size={16} />
                     </button>
                   </div>
                 </td>
@@ -122,34 +124,34 @@ const KatalogBarang = () => {
                   Sedang memuat data dari pangkalan data...
                 </td>
               </tr>
-            ) : catalog.length === 0 && !isAdding ? (
+            ) : activeCatalog.length === 0 && !isAdding ? (
               <tr>
                 <td colSpan="5" className="cell-text" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>
                   Belum ada Master Data tercatat di katalog.
                 </td>
               </tr>
             ) : (
-              catalog.map(item => {
+              activeCatalog.map(item => {
                 if (editId === item.id) {
                   return (
                     <tr key={item.id} style={{ backgroundColor: 'rgba(255, 255, 255, 0.02)' }}>
                       <td>
                         <input className="cell-input" autoFocus list="catalog-names" value={editForm.name} onChange={e => setEditForm({...editForm, name: toTitleCase(e.target.value)})} />
                       </td>
-                      <td>
+                      <td style={{ textAlign: 'center' }}>
                         <datalist id={`edit-brands-${item.id}`}>
-                          {(editForm.name ? [...new Set(catalog.filter(c => c.name.toLowerCase() === editForm.name.toLowerCase() && c.brand).map(c => c.brand))] : uniqueBrands).map((b, i) => <option key={i} value={b} />)}
+                          {(editForm.name ? [...new Set(activeCatalog.filter(c => c.name.toLowerCase() === editForm.name.toLowerCase() && c.brand).map(c => c.brand))] : uniqueBrands).map((b, i) => <option key={i} value={b} />)}
                         </datalist>
-                        <input className="cell-input" list={`edit-brands-${item.id}`} value={editForm.brand} onChange={e => setEditForm({...editForm, brand: toTitleCase(e.target.value)})} />
+                        <input className="cell-input" style={{ textAlign: 'center' }} list={`edit-brands-${item.id}`} value={editForm.brand} onChange={e => setEditForm({...editForm, brand: toTitleCase(e.target.value)})} />
                       </td>
-                      <td>
+                      <td style={{ textAlign: 'center' }}>
                         <datalist id={`edit-types-${item.id}`}>
-                          {(editForm.name ? [...new Set(catalog.filter(c => c.name.toLowerCase() === editForm.name.toLowerCase() && c.brand).map(c => c.type))] : uniqueTypes).map((t, i) => <option key={i} value={t} />)}
+                          {(editForm.name ? [...new Set(activeCatalog.filter(c => c.name.toLowerCase() === editForm.name.toLowerCase() && c.brand).map(c => c.type))] : uniqueTypes).map((t, i) => <option key={i} value={t} />)}
                         </datalist>
-                        <input className="cell-input" list={`edit-types-${item.id}`} value={editForm.type} onChange={e => setEditForm({...editForm, type: toTitleCase(e.target.value)})} />
+                        <input className="cell-input" style={{ textAlign: 'center' }} list={`edit-types-${item.id}`} value={editForm.type} onChange={e => setEditForm({...editForm, type: toTitleCase(e.target.value)})} />
                       </td>
-                      <td>
-                        <input className="cell-input" value={editForm.unit} onChange={e => setEditForm({...editForm, unit: toTitleCase(e.target.value)})} />
+                      <td style={{ textAlign: 'center' }}>
+                        <input className="cell-input" style={{ textAlign: 'center' }} value={editForm.unit} onChange={e => setEditForm({...editForm, unit: toTitleCase(e.target.value)})} />
                       </td>
                       <td style={{ textAlign: 'center', verticalAlign: 'middle' }}>
                         <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
@@ -168,9 +170,9 @@ const KatalogBarang = () => {
                 return (
                   <tr key={item.id}>
                     <td className="cell-text" style={{ color: 'var(--text-primary)', fontWeight: '500' }}>{item.name}</td>
-                    <td className="cell-text">{item.brand}</td>
-                    <td className="cell-text">{item.type}</td>
-                    <td className="cell-text"><span className="badge badge-blue">{item.unit}</span></td>
+                    <td className="cell-text" style={{ textAlign: 'center' }}>{item.brand}</td>
+                    <td className="cell-text" style={{ textAlign: 'center' }}>{item.type}</td>
+                    <td className="cell-text" style={{ textAlign: 'center' }}><span className="badge badge-blue">{item.unit}</span></td>
                     <td style={{ textAlign: 'center', verticalAlign: 'middle' }}>
                       <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
                         <button 
@@ -195,6 +197,7 @@ const KatalogBarang = () => {
             )}
           </tbody>
         </table>
+      </div>
       </div>
     </div>
   );

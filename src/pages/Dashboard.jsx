@@ -4,7 +4,7 @@ import { Trash2, Clock, LayoutDashboard } from 'lucide-react';
 import CustomSelect from '../components/CustomSelect';
 
 const Dashboard = () => {
-  const { catalog, stock, snapshots, loading, getDashboardData, getFullInventory, clearData } = useMockDB();
+  const { catalog, stock, snapshots, loading, getDashboardData, getFullInventory, clearData, seedDatabase } = useMockDB();
   const [selectedSnapshotId, setSelectedSnapshotId] = React.useState('LATEST');
   const [filterMonth, setFilterMonth] = React.useState('ALL');
 
@@ -23,8 +23,12 @@ const Dashboard = () => {
     ? (filteredSnapshots.length > 0 ? filteredSnapshots[0] : null)
     : snapshots.find(s => s.id === selectedSnapshotId);
 
-  const targetStock = currentSnapshot ? currentSnapshot.stock_state : stock;
-  const targetCatalog = currentSnapshot ? currentSnapshot.catalog_state : catalog;
+  const targetStock = currentSnapshot 
+    ? (Array.isArray(currentSnapshot.stock_state) ? currentSnapshot.stock_state : Object.values(currentSnapshot.stock_state || {})) 
+    : stock;
+  const targetCatalog = currentSnapshot 
+    ? (Array.isArray(currentSnapshot.catalog_state) ? currentSnapshot.catalog_state : Object.values(currentSnapshot.catalog_state || {})) 
+    : catalog;
 
   const inventory = getFullInventory(targetStock, targetCatalog);
 
@@ -57,10 +61,9 @@ const Dashboard = () => {
         label: formatDate(snap.timestamp)
     }))
   ];
-
   return (
-    <div>
-      <div className="topbar" style={{ height: '54px' }}>
+    <div className="page-container">
+      <div className="topbar">
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <h2 className="page-title">
             <LayoutDashboard size={20} color="var(--primary-blue)" /> Overview Inventaris
@@ -74,6 +77,15 @@ const Dashboard = () => {
                 : <span>Kondisi Terkini</span>
             }
           </div>
+        </div>
+        
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <button className="btn btn-warning" style={{ display: 'flex', alignItems: 'center', gap: '6px' }} onClick={seedDatabase}>
+            <Clock size={16} /> Seed Database
+          </button>
+          <button className="btn btn-danger" style={{ display: 'flex', alignItems: 'center', gap: '6px' }} onClick={clearData}>
+            <Trash2 size={16} /> Reset
+          </button>
         </div>
         
         <div className="mobile-scrollable filter-container-wrapper" style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
@@ -103,7 +115,8 @@ const Dashboard = () => {
         </div>
       </div>
       
-      <div className="grid-container" style={{ overflowX: 'auto', marginTop: '24px' }}>
+      <div className="page-content">
+        <div className="grid-container" style={{ overflowX: 'auto', marginTop: '24px' }}>
         <table className="grid-table" style={{ minWidth: '900px' }}>
           <thead>
             <tr>
@@ -142,6 +155,7 @@ const Dashboard = () => {
             )}
           </tbody>
         </table>
+      </div>
       </div>
     </div>
   );

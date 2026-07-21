@@ -12,14 +12,16 @@ const HistoryLog = () => {
     return <span className="badge badge-yellow">Opname</span>;
   };
 
-  const getItemName = (itemId) => {
-    // 1. Coba cari di katalog aktual saat ini
-    let item = catalog.find(i => i.id === itemId);
+  const getItemName = (log) => {
+    if (log.itemSnapshot) {
+      return `${log.itemSnapshot.name} (${log.itemSnapshot.brand} ${log.itemSnapshot.type})`;
+    }
+
+    let item = catalog.find(i => i.id === log.itemId);
     
-    // 2. Jika barang sudah dihapus dari katalog, cari jejaknya di histori snapshot masa lalu
     if (!item && snapshots) {
       for (const snap of snapshots) {
-        const found = snap.catalog_state?.find(i => i.id === itemId);
+        const found = snap.catalog_state?.find(i => i.id === log.itemId);
         if (found) {
           item = found;
           break;
@@ -75,7 +77,7 @@ const HistoryLog = () => {
                 <tr key={log.id}>
                   <td className="cell-text" style={{ color: 'var(--text-secondary)' }}>{formatDate(log.date)}</td>
                   <td className="cell-text">{getLogBadge(log.action)}</td>
-                  <td className="cell-text" style={{ color: 'var(--text-primary)' }}>{getItemName(log.itemId)}</td>
+                  <td className="cell-text" style={{ fontWeight: '500', color: 'var(--text-primary)' }}>{getItemName(log)}</td>
                   <td className="cell-text" style={{ fontWeight: '500' }}>
                     {log.qty_change}
                   </td>

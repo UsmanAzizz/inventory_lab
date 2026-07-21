@@ -32,7 +32,7 @@ const Layout = () => {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', backgroundColor: 'var(--bg-void)' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', backgroundColor: 'var(--bg-void)' }}>
       
       {/* Mobile Header (Hidden on Desktop) */}
       <header className="mobile-header mobile-only">
@@ -102,8 +102,8 @@ const Layout = () => {
         </aside>
 
         {/* Main Content Area */}
-        <main style={{ flex: 1, overflowY: 'auto' }}>
-          <div className="main-content-wrapper" style={{ padding: '40px 48px' }}>
+        <main style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+          <div className="main-content-wrapper" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', padding: '40px 48px 0 48px' }}>
             <Outlet />
           </div>
         </main>

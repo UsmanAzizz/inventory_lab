@@ -1,13 +1,51 @@
 import React, { useState } from 'react';
-import { ArrowDownRight, Plus, Trash2 } from 'lucide-react';
+import { ArrowDownRight, Plus, Trash2, Calendar, FileText } from 'lucide-react';
 
 import { useMockDB } from '../store/FirebaseDBContext';
 import { toTitleCase } from '../utils';
 import toast from 'react-hot-toast';
+import CustomSelect from '../components/CustomSelect';
 
 const InputRusak = () => {
-  const { catalog, saveRusak } = useMockDB();
+  const { catalog, logs, saveRusak } = useMockDB();
   const [rows, setRows] = useState([]);
+
+  // Filter Month Logic
+  const currentMonthStr = new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().substring(0, 7);
+  const [filterMonth, setFilterMonth] = useState(currentMonthStr);
+
+  const damageLogs = logs.filter(l => l.action === 'DAMAGE').sort((a, b) => new Date(b.date) - new Date(a.date));
+  
+  const mappedLogs = damageLogs.map(log => {
+    if (log.itemSnapshot) {
+      return { ...log, ...log.itemSnapshot };
+    }
+    const item = catalog.find(c => c.id === log.itemId);
+    return {
+      ...log,
+      name: item?.name || 'Unknown Item',
+      brand: item?.brand || '-',
+      type: item?.type || '-',
+      unit: item?.unit || '-'
+    };
+  });
+
+  const availableMonths = [...new Set(mappedLogs.map(l => l.date.substring(0, 7)))].sort().reverse();
+  if (!availableMonths.includes(currentMonthStr)) availableMonths.unshift(currentMonthStr);
+
+  const formatMonthLabel = (yyyyMm) => {
+    if (yyyyMm === 'ALL') return 'Semua Riwayat';
+    const [year, month] = yyyyMm.split('-');
+    const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+    return `${months[parseInt(month, 10) - 1]} ${year}`;
+  };
+
+  const monthOptions = [
+    { value: 'ALL', label: 'Semua Riwayat' },
+    ...availableMonths.map(m => ({ value: m, label: formatMonthLabel(m) }))
+  ];
+
+  const filteredLogs = filterMonth === 'ALL' ? mappedLogs : mappedLogs.filter(l => l.date.startsWith(filterMonth));
 
   // Datalist options
   const uniqueNames = [...new Set(catalog.map(c => c.name))].filter(Boolean);
@@ -70,120 +108,161 @@ const InputRusak = () => {
   };
 
   return (
-    <div>
-      <div className="topbar" style={{ height: '54px' }}>
+    <div className="page-container">
+      <div className="topbar">
         <div style={{ display: 'flex', alignItems: 'center', height: '38px' }}>
           <h2 className="page-title">
             <ArrowDownRight size={20} color="#EF4444" /> Catat Barang Rusak
           </h2>
         </div>
-        <div style={{ display: 'flex', gap: '12px' }}>
+        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+          <CustomSelect value={filterMonth} onChange={setFilterMonth} options={monthOptions} width="160px" />
           <button className="btn btn-outline" onClick={addRow}>
             <Plus size={16} /> Tambah Baris Transaksi
           </button>
-          <button className="btn btn-primary" onClick={handleSave}>Simpan</button>
+          {rows.length > 0 && <button className="btn btn-primary" onClick={handleSave}>Simpan</button>}
         </div>
       </div>
+
+      <div className="page-content">
 
       <datalist id="catalog-names">
         {uniqueNames.map((n, i) => <option key={i} value={n} />)}
       </datalist>
 
-      {rows.length === 0 ? (
-        <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-secondary)', border: '1px dashed var(--border-color)', borderRadius: 'var(--radius-sm)' }}>
-          Belum ada data barang rusak. Tekan <b>+ Tambah Baris Barang</b> untuk memulai.
-        </div>
-      ) : (
-        <div className="grid-container" style={{ overflowX: 'auto' }}>
-          <table className="grid-table" style={{ minWidth: '900px' }}>
-            <thead>
-              <tr>
-                <th style={{ width: '20%' }}>Nama Barang</th>
-                <th style={{ width: '15%' }}>Merek</th>
-                <th style={{ width: '15%' }}>Tipe/Model</th>
-                <th style={{ width: '10%' }}>Satuan</th>
-                <th style={{ width: '15%', color: '#EF4444' }}>Jumlah Rusak</th>
-                <th style={{ width: '25%' }}>Keterangan</th>
-                <th style={{ width: '5%', textAlign: 'center' }}>Aksi</th>
+      {/* Area Tabel Riwayat dan Input */}
+      <div className="grid-container" style={{ overflowX: 'auto' }}>
+        <table className="grid-table" style={{ minWidth: '900px' }}>
+          <thead>
+            <tr>
+              <th style={{ width: '12%' }}>Tanggal</th>
+              <th style={{ width: '17%' }}>Nama Barang</th>
+              <th style={{ width: '13%' }}>Merek</th>
+              <th style={{ width: '13%' }}>Tipe/Model</th>
+              <th style={{ width: '8%' }}>Satuan</th>
+              <th style={{ width: '10%', color: '#EF4444' }}>Jumlah</th>
+              <th style={{ width: '21%' }}>Keterangan</th>
+              <th style={{ width: '6%', textAlign: 'center' }}>Aksi</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((row) => (
+              <tr key={row.rowId} style={{ backgroundColor: 'rgba(239, 68, 68, 0.05)' }}>
+                <td className="cell-text" style={{ verticalAlign: 'middle', position: 'relative', color: 'var(--text-secondary)' }}>
+                  {new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}<br/>
+                  <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}</span>
+                  <span style={{ position: 'absolute', bottom: '4px', right: '4px', display: 'inline-block', padding: '2px 6px', backgroundColor: 'rgba(239, 68, 68, 0.1)', color: '#EF4444', borderRadius: '4px', fontSize: '9px', fontWeight: '600' }}>
+                    Entri Baru
+                  </span>
+                </td>
+                <td>
+                  <input 
+                    type="text" 
+                    className="cell-input" 
+                    list="catalog-names"
+                    value={row.name}
+                    onChange={(e) => handleChange(row.rowId, 'name', e.target.value)}
+                  />
+                </td>
+                <td>
+                  <datalist id={`brands-${row.rowId}`}>
+                    {(row.name ? [...new Set(catalog.filter(c => c.name.toLowerCase() === row.name.toLowerCase() && c.brand).map(c => c.brand))] : uniqueBrands).map((b, i) => <option key={i} value={b} />)}
+                  </datalist>
+                  <input 
+                    type="text" 
+                    className="cell-input" 
+                    list={`brands-${row.rowId}`}
+                    value={row.brand}
+                    onChange={(e) => handleChange(row.rowId, 'brand', e.target.value)}
+                  />
+                </td>
+                <td>
+                  <datalist id={`types-${row.rowId}`}>
+                    {(row.name ? [...new Set(catalog.filter(c => c.name.toLowerCase() === row.name.toLowerCase() && c.brand).map(c => c.type))] : uniqueTypes).map((t, i) => <option key={i} value={t} />)}
+                  </datalist>
+                  <input 
+                    type="text" 
+                    className="cell-input" 
+                    list={`types-${row.rowId}`}
+                    value={row.type}
+                    onChange={(e) => handleChange(row.rowId, 'type', e.target.value)}
+                  />
+                </td>
+                <td>
+                  <input 
+                    type="text" 
+                    className="cell-input" 
+                    value={row.unit}
+                    disabled={row.isMatched}
+                    onChange={(e) => handleChange(row.rowId, 'unit', e.target.value)}
+                    style={{ color: row.isMatched ? 'var(--text-muted)' : 'var(--text-primary)' }}
+                  />
+                </td>
+                <td>
+                  <input 
+                    type="number" 
+                    min="0"
+                    className="cell-input" 
+                    style={{ color: '#EF4444', fontWeight: 'bold' }}
+                    value={row.qty_out}
+                    onChange={(e) => handleChange(row.rowId, 'qty_out', e.target.value)}
+                  />
+                </td>
+                <td>
+                  <input 
+                    type="text" 
+                    className="cell-input" 
+                    value={row.notes}
+                    onChange={(e) => handleChange(row.rowId, 'notes', e.target.value)}
+                  />
+                </td>
+                <td style={{ textAlign: 'center', verticalAlign: 'middle' }}>
+                  <button 
+                    onClick={() => removeRow(row.rowId)}
+                    style={{ background: 'none', border: 'none', color: '#EF4444', cursor: 'pointer' }}
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {rows.map((row) => (
-                <tr key={row.rowId}>
-                  <td>
-                    <input 
-                      type="text" 
-                      className="cell-input" 
-                      list="catalog-names"
-                      value={row.name}
-                      onChange={(e) => handleChange(row.rowId, 'name', e.target.value)}
-                    />
-                  </td>
-                  <td>
-                    <datalist id={`brands-${row.rowId}`}>
-                      {(row.name ? [...new Set(catalog.filter(c => c.name.toLowerCase() === row.name.toLowerCase() && c.brand).map(c => c.brand))] : uniqueBrands).map((b, i) => <option key={i} value={b} />)}
-                    </datalist>
-                    <input 
-                      type="text" 
-                      className="cell-input" 
-                      list={`brands-${row.rowId}`}
-                      value={row.brand}
-                      onChange={(e) => handleChange(row.rowId, 'brand', e.target.value)}
-                    />
-                  </td>
-                  <td>
-                    <datalist id={`types-${row.rowId}`}>
-                      {(row.name ? [...new Set(catalog.filter(c => c.name.toLowerCase() === row.name.toLowerCase() && c.brand).map(c => c.type))] : uniqueTypes).map((t, i) => <option key={i} value={t} />)}
-                    </datalist>
-                    <input 
-                      type="text" 
-                      className="cell-input" 
-                      list={`types-${row.rowId}`}
-                      value={row.type}
-                      onChange={(e) => handleChange(row.rowId, 'type', e.target.value)}
-                    />
-                  </td>
-                  <td>
-                    <input 
-                      type="text" 
-                      className="cell-input" 
-                      value={row.unit}
-                      disabled={row.isMatched}
-                      onChange={(e) => handleChange(row.rowId, 'unit', e.target.value)}
-                      style={{ color: row.isMatched ? 'var(--text-muted)' : 'var(--text-primary)' }}
-                    />
-                  </td>
-                  <td>
-                    <input 
-                      type="number" 
-                      min="0"
-                      className="cell-input" 
-                      value={row.qty_out}
-                      onChange={(e) => handleChange(row.rowId, 'qty_out', e.target.value)}
-                    />
-                  </td>
-                  <td>
-                    <input 
-                      type="text" 
-                      className="cell-input" 
-                      value={row.notes}
-                      onChange={(e) => handleChange(row.rowId, 'notes', e.target.value)}
-                    />
-                  </td>
-                  <td style={{ textAlign: 'center', verticalAlign: 'middle' }}>
-                    <button 
-                      onClick={() => removeRow(row.rowId)}
-                      style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+            ))}
+            
+            {filteredLogs.length === 0 && rows.length === 0 ? (
+              <tr>
+                <td colSpan="8" style={{ padding: '32px', textAlign: 'center', color: 'var(--text-muted)' }}>
+                  Tidak ada riwayat barang rusak pada periode ini.
+                </td>
+              </tr>
+            ) : (
+              filteredLogs.map(log => {
+                const logDate = new Date(log.date);
+                const match = log.qty_change.match(/[-+]?(\d+)/);
+                const qty = match ? parseInt(match[1]) : 0;
+                
+                return (
+                  <tr key={log.id} style={{ opacity: 0.85 }}>
+                    <td className="cell-text" style={{ verticalAlign: 'middle', color: 'var(--text-secondary)' }}>
+                      {logDate.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}<br/>
+                      <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{logDate.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}</span>
+                    </td>
+                    <td className="cell-text" style={{ fontWeight: '500' }}>{log.name}</td>
+                    <td className="cell-text">{log.brand}</td>
+                    <td className="cell-text">{log.type}</td>
+                    <td className="cell-text">{log.unit}</td>
+                    <td className="cell-text" style={{ color: '#EF4444', fontWeight: 'bold' }}>{Math.abs(qty)}</td>
+                    <td className="cell-text" style={{ color: 'var(--text-secondary)' }}>{log.notes}</td>
+                    <td style={{ textAlign: 'center', verticalAlign: 'middle' }}>
+                      <FileText size={16} color="var(--border-color)" />
+                    </td>
+                  </tr>
+                );
+              })
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      </div>
     </div>
   );
 };
