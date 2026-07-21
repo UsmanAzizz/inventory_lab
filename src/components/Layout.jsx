@@ -2,10 +2,12 @@ import React from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { LayoutDashboard, CheckSquare, ArrowDownRight, ArrowUpRight, PackageMinus, Clock, Box, LogOut, Printer, Power } from 'lucide-react';
 import { useConfirm } from '../store/ConfirmDialogContext';
+import { useAuth } from '../store/AuthContext';
 
 const Layout = () => {
   const location = useLocation();
   const { confirm } = useConfirm();
+  const { logout, currentUser } = useAuth();
 
   const navItems = [
     { path: '/', label: 'Overview', icon: <LayoutDashboard size={16} />, activeColor: 'var(--primary-blue)', activeBg: 'rgba(59, 130, 246, 0.1)' },
@@ -26,7 +28,7 @@ const Layout = () => {
     });
     
     if (isConfirmed) {
-      localStorage.removeItem('auth_token');
+      await logout();
       window.location.href = '/login';
     }
   };
@@ -90,13 +92,52 @@ const Layout = () => {
             })}
           </nav>
           
-          <div style={{ marginTop: 'auto', padding: '0 12px' }}>
-            <button
+          <div style={{ marginTop: 'auto', padding: '0 24px' }}>
+            {currentUser && (
+              <div style={{ marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <img 
+                  src={currentUser.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.email || 'User')}&background=0D8ABC&color=fff`} 
+                  alt="Profile" 
+                  style={{ width: '32px', height: '32px', borderRadius: '50%' }}
+                />
+                <div style={{ overflow: 'hidden' }}>
+                  <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {currentUser.displayName || 'Admin'}
+                  </p>
+                  <p style={{ margin: 0, fontSize: '11px', color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {currentUser.email}
+                  </p>
+                </div>
+              </div>
+            )}
+            
+            <button 
               onClick={handleLogout}
-              className="desktop-logout-btn"
+              style={{
+                width: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                padding: '8px 16px',
+                backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                color: '#EF4444',
+                border: '1px solid rgba(239, 68, 68, 0.2)',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                fontSize: '14px',
+                fontWeight: '500',
+                transition: 'all 0.2s ease',
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.2)';
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
+              }}
             >
-              <span className="logout-icon"><Power size={18} /></span>
-              <span className="logout-text">Logout</span>
+              <Power size={16} />
+              <span>Logout</span>
             </button>
           </div>
         </aside>

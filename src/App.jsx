@@ -11,10 +11,11 @@ import Laporan from './pages/Laporan';
 import Login from './pages/Login';
 import { FirebaseDBProvider } from './store/FirebaseDBContext';
 import { ConfirmDialogProvider } from './store/ConfirmDialogContext';
+import { AuthProvider, useAuth } from './store/AuthContext';
 
 const ProtectedRoute = ({ children }) => {
-  const isAuth = localStorage.getItem('auth_token') === 'verified';
-  if (!isAuth) {
+  const { currentUser } = useAuth();
+  if (!currentUser) {
     return <Navigate to="/login" replace />;
   }
   return children;
@@ -24,8 +25,9 @@ import { Toaster } from 'react-hot-toast';
 
 function App() {
   return (
-    <ConfirmDialogProvider>
-      <FirebaseDBProvider>
+    <AuthProvider>
+      <ConfirmDialogProvider>
+        <FirebaseDBProvider>
         <Toaster 
           position="top-center" 
           toastOptions={{ 
@@ -52,10 +54,11 @@ function App() {
               <Route path="outbound" element={<InputKeluar />} />
               <Route path="laporan" element={<Laporan />} />
             </Route>
-          </Routes>
-        </BrowserRouter>
-      </FirebaseDBProvider>
-    </ConfirmDialogProvider>
+            </Routes>
+          </BrowserRouter>
+        </FirebaseDBProvider>
+      </ConfirmDialogProvider>
+    </AuthProvider>
   );
 }
 
